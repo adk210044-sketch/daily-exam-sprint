@@ -12,7 +12,7 @@ class OnbNotificationPermissionScreen extends StatelessWidget {
 
   Future<void> _finish(BuildContext context, {required bool enabled}) async {
     final appState = context.read<AppState>();
-    await appState.settingsRepo.setNotificationsEnabled(enabled);
+    await appState.setNotificationsEnabled(enabled);
     await appState.completeOnboarding();
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(

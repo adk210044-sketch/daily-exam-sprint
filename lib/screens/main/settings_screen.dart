@@ -33,32 +33,185 @@ class SettingsScreen extends StatelessWidget {
     ).pushReplacement(MaterialPageRoute(builder: (_) => screen));
   }
 
+  Future<void> _pickReminderTime(
+    BuildContext context,
+    AppState appState,
+  ) async {
+    final current = appState.settings?.reminderTime ?? '08:15';
+    final parts = current.split(':');
+    final initial = TimeOfDay(
+      hour: int.tryParse(parts[0]) ?? 8,
+      minute: int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 15,
+    );
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: ZenColors.accent),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      final hh = picked.hour.toString().padLeft(2, '0');
+      final mm = picked.minute.toString().padLeft(2, '0');
+      await appState.setReminderTime('$hh:$mm');
+    }
+  }
+
+  Future<void> _pickExamType(BuildContext context, AppState appState) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: ZenColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: ZenColors.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                _examTypeTile(
+                  context,
+                  value: 'type1',
+                  label: '第1種 衛生管理者',
+                  sub: '有害業務あり · 1日9問',
+                  current: appState.examType,
+                ),
+                _examTypeTile(
+                  context,
+                  value: 'type2',
+                  label: '第2種 衛生管理者',
+                  sub: '有害業務なし · 1日6問',
+                  current: appState.examType,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (selected != null && selected != appState.examType) {
+      await appState.setExamType(selected);
+    }
+  }
+
+  Widget _examTypeTile(
+    BuildContext context, {
+    required String value,
+    required String label,
+    required String sub,
+    required String current,
+  }) {
+    final isSel = value == current;
+    return ListTile(
+      onTap: () => Navigator.of(context).pop(value),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: isSel ? ZenColors.accent : ZenColors.ink,
+        ),
+      ),
+      subtitle: Text(
+        sub,
+        style: const TextStyle(fontSize: 12, color: ZenColors.inkSub),
+      ),
+      trailing: isSel
+          ? const Icon(Icons.check_circle, color: ZenColors.accent)
+          : null,
+    );
+  }
+
+  Future<void> _pickFontSize(BuildContext context, AppState appState) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: ZenColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        const options = [
+          (value: 'small', label: '小'),
+          (value: 'medium', label: '標準'),
+          (value: 'large', label: '大'),
+        ];
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: ZenColors.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                ...options.map((opt) {
+                  final isSel = opt.value == appState.fontSize;
+                  return ListTile(
+                    onTap: () => Navigator.of(context).pop(opt.value),
+                    title: Text(
+                      opt.label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isSel ? ZenColors.accent : ZenColors.ink,
+                      ),
+                    ),
+                    trailing: isSel
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: ZenColors.accent,
+                          )
+                        : null,
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (selected != null && selected != appState.fontSize) {
+      await appState.setFontSize(selected);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, _) {
         final settings = appState.settings;
         final examTypeLabel = appState.examType == 'type1' ? '第1種' : '第2種';
-
-        final rows = <_SettingsRow>[
-          _SettingsRow(
-            label: 'リマインダー',
-            value: settings?.reminderTime ?? '08:15',
-            section: '学習',
-          ),
-          _SettingsRow(label: '試験区分', value: examTypeLabel),
-          const _SettingsRow(label: '通知サウンド', value: '無音'),
-          const _SettingsRow(label: 'フォントサイズ', value: '標準', section: '外観'),
-          const _SettingsRow(label: '解いている試験', value: '', section: '学習内容'),
-          _SettingsRow(
-            label: 'サブスク管理',
-            value: appState.purchased ? '購入済み' : '未購入',
-            section: 'アカウント',
-          ),
-          const _SettingsRow(label: '利用規約', value: ''),
-          const _SettingsRow(label: 'プライバシー', value: ''),
-          const _SettingsRow(label: 'このアプリについて', value: 'v1.0.0'),
-        ];
+        final fontSizeLabel = switch (appState.fontSize) {
+          'small' => '小',
+          'large' => '大',
+          _ => '標準',
+        };
 
         return Scaffold(
           backgroundColor: ZenColors.bg,
@@ -94,67 +247,52 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: rows.length,
-                    itemBuilder: (context, i) {
-                      final row = rows[i];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (row.section != null)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: 20,
-                                bottom: 8,
-                                left: 4,
-                              ),
-                              child: Text(
-                                row.section!,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  letterSpacing: 1.6,
-                                  color: ZenColors.inkMute,
-                                ),
-                              ),
-                            ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                              horizontal: 4,
-                            ),
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: ZenColors.line,
-                                  width: 0.5,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  row.label,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: ZenColors.ink,
-                                  ),
-                                ),
-                                if (row.value.isNotEmpty)
-                                  Text(
-                                    row.value,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: ZenColors.inkSub,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                    children: [
+                      _sectionLabel('学習'),
+                      _row(
+                        context,
+                        label: 'リマインダー',
+                        value: settings?.reminderTime ?? '08:15',
+                        onTap: () => _pickReminderTime(context, appState),
+                      ),
+                      _switchRow(
+                        label: '通知',
+                        value: appState.notificationsEnabled,
+                        onChanged: (v) => appState.setNotificationsEnabled(v),
+                      ),
+                      _row(
+                        context,
+                        label: '試験区分',
+                        value: examTypeLabel,
+                        onTap: () => _pickExamType(context, appState),
+                      ),
+                      _sectionLabel('外観'),
+                      _row(
+                        context,
+                        label: 'フォントサイズ',
+                        value: fontSizeLabel,
+                        onTap: () => _pickFontSize(context, appState),
+                      ),
+                      _sectionLabel('アカウント'),
+                      _row(
+                        context,
+                        label: 'サブスク管理',
+                        value: appState.purchased ? '購入済み' : '未購入',
+                        onTap: null,
+                      ),
+                      _sectionLabel(''),
+                      _row(context, label: '利用規約', value: '', onTap: null),
+                      _row(context, label: 'プライバシー', value: '', onTap: null),
+                      _row(
+                        context,
+                        label: 'このアプリについて',
+                        value: 'v1.0.0',
+                        onTap: null,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
                 ZenBottomTab(
@@ -168,11 +306,94 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
-}
 
-class _SettingsRow {
-  final String label;
-  final String value;
-  final String? section;
-  const _SettingsRow({required this.label, required this.value, this.section});
+  Widget _sectionLabel(String label) {
+    if (label.isEmpty) {
+      return const SizedBox(height: 12);
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 10,
+          letterSpacing: 1.6,
+          color: ZenColors.inkMute,
+        ),
+      ),
+    );
+  }
+
+  Widget _row(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: ZenColors.line, width: 0.5)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: ZenColors.ink),
+            ),
+            Row(
+              children: [
+                if (value.isNotEmpty)
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: ZenColors.inkSub,
+                    ),
+                  ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 16,
+                    color: ZenColors.inkMute,
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _switchRow({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: ZenColors.line, width: 0.5)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, color: ZenColors.ink),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: ZenColors.accent,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
 }
