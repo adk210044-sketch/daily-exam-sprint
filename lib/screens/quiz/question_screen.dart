@@ -91,79 +91,88 @@ class QuestionScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-                  child: CategoryChip(category: q.categoryName),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),
-                  child: Text(q.text, style: ZenText.questionText()),
-                ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
                     child: Column(
-                      children: List.generate(q.choices.length, (i) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: GestureDetector(
-                            onTap: () async {
-                              await quiz.answer(i);
-                              if (context.mounted) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        FeedbackScreen(chosenIndex: i),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: ZenColors.card,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: ZenColors.line),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 28,
-                                    height: 28,
-                                    alignment: Alignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                          child: CategoryChip(category: q.categoryName),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),
+                          child: Text(q.text, style: ZenText.questionText()),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: Column(
+                            children: List.generate(q.choices.length, (i) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    await quiz.answer(i);
+                                    if (context.mounted) {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              FeedbackScreen(chosenIndex: i),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 16,
+                                    ),
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: ZenColors.line,
-                                        width: 1.5,
-                                      ),
+                                      color: ZenColors.card,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: ZenColors.line),
                                     ),
-                                    child: Text(
-                                      '${i + 1}',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: ZenColors.inkSub,
-                                      ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 28,
+                                          height: 28,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: ZenColors.line,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${i + 1}',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: ZenColors.inkSub,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            q.choices[i],
+                                            style: ZenText.choiceText(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      q.choices[i],
-                                      style: ZenText.choiceText(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            }),
                           ),
-                        );
-                      }),
+                        ),
+                      ],
                     ),
                   ),
                 ),

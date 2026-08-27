@@ -168,7 +168,9 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            hanamaru ? '本日の暦に ◎ を刻みました。' : '同じ問題、もう一度挑戦できます。',
+                            hanamaru
+                                ? '本日のカレンダーに ◎ を刻みました。'
+                                : '同じ問題、もう一度挑戦できます。',
                             style: const TextStyle(
                               fontSize: 12,
                               color: ZenColors.inkSub,

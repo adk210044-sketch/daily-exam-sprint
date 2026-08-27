@@ -13,8 +13,8 @@ class ZenColors {
   static const Color bg = Color(0xFFFAF8F3); // off-white paper
   static const Color bgSub = Color(0xFFF1EDE3); // subtle beige surface
   static const Color ink = Color(0xFF1F2419); // deep ink
-  static const Color inkSub = Color(0xFF5A5F52); // muted gray-green
-  static const Color inkMute = Color(0xFF8F9384); // hint text
+  static const Color inkSub = Color(0xFF454A3D); // muted gray-green (濃く調整)
+  static const Color inkMute = Color(0xFF6B6F5F); // hint text (濃く調整)
   static const Color line = Color(0xFFE3DECD); // divider
   static const Color card = Color(0xFFFFFFFF);
 

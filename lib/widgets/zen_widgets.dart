@@ -149,7 +149,7 @@ class ProgressDotsRow extends StatelessWidget {
   }
 }
 
-/// ボトムタブ (ホーム / 暦 / 苦手復習 / 設定)
+/// ボトムタブ (ホーム / カレンダー / 苦手復習 / 設定)
 class ZenBottomTab extends StatelessWidget {
   final String active;
   final ValueChanged<String> onTap;
@@ -158,7 +158,7 @@ class ZenBottomTab extends StatelessWidget {
 
   static const items = [
     (key: 'home', label: 'ホーム'),
-    (key: 'calendar', label: '暦'),
+    (key: 'calendar', label: 'カレンダー'),
     (key: 'review', label: '苦手復習'),
     (key: 'settings', label: '設定'),
   ];

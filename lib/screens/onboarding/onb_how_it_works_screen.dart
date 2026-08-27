@@ -156,7 +156,7 @@ class OnbHowItWorksScreen extends StatelessWidget {
                                   height: 1.7,
                                 ),
                                 children: [
-                                  TextSpan(text: '満点を取れば、暦に '),
+                                  TextSpan(text: '満点を取れば、カレンダーに '),
                                   TextSpan(
                                     text: '花丸',
                                     style: TextStyle(

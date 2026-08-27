@@ -238,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               ZenTextLink(
-                                label: '暦を見る',
+                                label: 'カレンダーを見る',
                                 color: ZenColors.accent,
                                 onPressed: () => _onTabTap('calendar'),
                               ),

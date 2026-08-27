@@ -11,7 +11,7 @@ import 'home_screen.dart';
 import 'review_screen.dart';
 import 'settings_screen.dart';
 
-/// 暦 (ZenCalendar) — 月間カレンダー
+/// カレンダー (ZenCalendar) — 月間カレンダー
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
