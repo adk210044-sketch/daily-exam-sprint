@@ -1,11 +1,11 @@
 import '../database/app_database.dart';
 
-/// 実試験1回分を Day1〜4=dailyCount問 / Day5=dailyCount+1問 に分割する。
+/// 実試験1回分を Day1〜5すべて dailyCount問 に分割する。
 ///
 /// - 各カテゴリ内で round-robin して、カテゴリ横断で均等になる1本の
 ///   フラットリストを作る (バランスの取れた出題順)。
 /// - Day1〜Day4 は dailyCount 問ずつ新問を割り当てる。
-/// - Day5(最終日) は「残りの新問」+「最終日を dailyCount+1 問に揃えるための
+/// - Day5(最終日) は「残りの新問」+「dailyCount 問に揃えるための
 ///   前日までの問題の再掲」で構成する。
 ///   (法改正等で除外された問題や、試験によって総問題数が少ない場合は、
 ///    再掲で埋める問題数が自然と増える)
@@ -20,7 +20,7 @@ class DaySplitService {
     int days = 5,
   }) {
     if (questions.isEmpty) return List.generate(days, (_) => <Question>[]);
-    if (days < 2) days = 2; // 最終日+1ロジックのため最低2日は必要
+    if (days < 2) days = 2; // 最終日の再掲ロジックのため最低2日は必要
 
     // 1. カテゴリごとに分類 (元の出現順を保持)
     final byCat = <String, List<Question>>{};
@@ -54,8 +54,8 @@ class DaySplitService {
       cursor = end;
     }
 
-    // 3. 最終日: 残りの新問 + 前日までの問題からの再掲で dailyCount+1 に揃える
-    final lastTarget = dailyCount + 1;
+    // 3. 最終日: 残りの新問 + 前日までの問題からの再掲で dailyCount に揃える
+    final lastTarget = dailyCount;
     final remaining = cursor < flat.length
         ? flat.sublist(cursor)
         : <Question>[];
