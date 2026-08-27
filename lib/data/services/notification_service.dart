@@ -79,7 +79,11 @@ class NotificationService {
   }
 
   /// "HH:mm" 形式の時刻で毎日リマインダーを再スケジュールする。
-  Future<void> scheduleDailyReminder(String hhmm) async {
+  /// [dailyCount] は試験区分に応じた1日の問題数 (第1種=9 / 第2種=6)。
+  Future<void> scheduleDailyReminder(
+    String hhmm, {
+    int dailyCount = 9,
+  }) async {
     if (kIsWeb) return;
     await init();
     try {
@@ -93,18 +97,18 @@ class NotificationService {
 
       await _plugin.zonedSchedule(
         id: _dailyReminderId,
-        title: '今日の9問、はじめましょう',
-        body: '1日9問 衛生管理者 — 今日の分がまだ残っています。',
+        title: '今日の$dailyCount問、はじめましょう',
+        body: '1日$dailyCount問 衛生管理者 — 今日の分がまだ残っています。',
         scheduledDate: scheduled,
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'daily_reminder_channel',
             '日次リマインダー',
-            channelDescription: '1日9問の学習リマインダー',
+            channelDescription: '1日$dailyCount問の学習リマインダー',
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,

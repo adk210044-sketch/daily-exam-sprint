@@ -8,6 +8,7 @@ import '../../providers/app_state.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
+import '../commerce/exam_selector_screen.dart';
 import '../quiz/question_screen.dart';
 import 'calendar_screen.dart';
 import 'review_screen.dart';
@@ -95,6 +96,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final quiz = context.read<QuizSessionProvider>();
     await quiz.startDaily(session.id);
+    if (!mounted) return;
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const QuestionScreen()));
+    _load();
+  }
+
+  /// おかわり機能 (有料版限定): 満点でなくても翌日の問題へ前倒しで進む。
+  Future<void> _advanceEarly() async {
+    final session = _currentSession;
+    if (session == null) return;
+    final appState = context.read<AppState>();
+    final quiz = context.read<QuizSessionProvider>();
+    if (!appState.purchased) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ZenColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'おかわりしますか?',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        content: const Text(
+          '満点でなくても、翌日の問題を前倒しで解けます。\n(有料版限定の機能です)',
+          style: TextStyle(fontSize: 13, color: ZenColors.inkSub, height: 1.6),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'キャンセル',
+              style: TextStyle(color: ZenColors.inkMute),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'おかわりする',
+              style: TextStyle(
+                color: ZenColors.accent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await appState.examRepo.advanceToNextDay(session.id);
+    if (!mounted) return;
+    await _load();
+    if (!mounted) return;
+    final refreshed = _currentSession;
+    if (refreshed == null) return;
+    await quiz.startDaily(refreshed.id);
     if (!mounted) return;
     await Navigator.of(
       context,
@@ -237,10 +298,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ],
                                 ),
                               ),
-                              ZenTextLink(
-                                label: 'カレンダーを見る',
-                                color: ZenColors.accent,
-                                onPressed: () => _onTabTap('calendar'),
+                              Row(
+                                children: [
+                                  ZenTextLink(
+                                    label: '解く試験を選ぶ',
+                                    color: ZenColors.accent,
+                                    onPressed: () => Navigator.of(
+                                      context,
+                                    ).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const ExamSelectorScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  ZenTextLink(
+                                    label: 'カレンダーを見る',
+                                    color: ZenColors.accent,
+                                    onPressed: () => _onTabTap('calendar'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -412,6 +490,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                     label: '今日の $dailyN問 をはじめる',
                                     onPressed: _startToday,
                                   ),
+                                  if (context.read<AppState>().purchased &&
+                                      day < 7) ...[
+                                    const SizedBox(height: 10),
+                                    GestureDetector(
+                                      onTap: _advanceEarly,
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: ZenColors.accentSoft,
+                                          borderRadius: BorderRadius.circular(
+                                            ZenColors.radiusBtn,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: const [
+                                            Icon(
+                                              Icons.fast_forward,
+                                              size: 15,
+                                              color: ZenColors.accentDeep,
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              'おかわり · 翌日の問題を前倒しで解く',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: ZenColors.accentDeep,
+                                                letterSpacing: 0.4,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                   const SizedBox(height: 14),
                                   Row(
                                     mainAxisAlignment:

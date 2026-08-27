@@ -32,6 +32,7 @@ class AppState extends ChangeNotifier {
     if (settings?.notificationsEnabled == true) {
       await NotificationService.instance.scheduleDailyReminder(
         settings!.reminderTime,
+        dailyCount: dailyQuestionCount,
       );
     }
     isReady = true;
@@ -50,13 +51,23 @@ class AppState extends ChangeNotifier {
     // 新しい examType に一致するセッションを自動選択する。
     await settingsRepo.setCurrentSessionId(null);
     await refreshSettings();
+    // 試験区分変更で1日の問題数(9→6等)も変わるため、通知文言を再スケジュール
+    if (settings?.notificationsEnabled == true) {
+      await NotificationService.instance.scheduleDailyReminder(
+        settings?.reminderTime ?? '08:15',
+        dailyCount: dailyQuestionCount,
+      );
+    }
   }
 
   Future<void> setReminderTime(String time) async {
     await settingsRepo.setReminderTime(time);
     await refreshSettings();
     if (settings?.notificationsEnabled == true) {
-      await NotificationService.instance.scheduleDailyReminder(time);
+      await NotificationService.instance.scheduleDailyReminder(
+        time,
+        dailyCount: dailyQuestionCount,
+      );
     }
   }
 
@@ -68,6 +79,7 @@ class AppState extends ChangeNotifier {
       if (granted || kIsWeb) {
         await NotificationService.instance.scheduleDailyReminder(
           settings?.reminderTime ?? '08:15',
+          dailyCount: dailyQuestionCount,
         );
       }
     } else {

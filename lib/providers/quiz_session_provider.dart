@@ -137,4 +137,12 @@ class QuizSessionProvider extends ChangeNotifier {
       await examRepo.advanceToNextDay(sessionId!);
     }
   }
+
+  /// おかわり機能 (有料版限定): 満点でなくても次のDayへ前倒しで進める。
+  /// 呼び出し側 (UI) で `appState.purchased == true` を確認してから呼ぶこと。
+  Future<void> advanceDayEarly() async {
+    if (mode == QuizMode.daily && sessionId != null) {
+      await examRepo.advanceToNextDay(sessionId!);
+    }
+  }
 }

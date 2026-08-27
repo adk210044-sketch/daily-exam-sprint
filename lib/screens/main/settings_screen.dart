@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/theme/zen_tokens.dart';
 import '../../providers/app_state.dart';
 import '../../widgets/zen_widgets.dart';
+import '../commerce/exam_selector_screen.dart';
+import '../commerce/paywall_screen.dart';
 import 'calendar_screen.dart';
 import 'home_screen.dart';
 import 'review_screen.dart';
@@ -268,6 +270,16 @@ class SettingsScreen extends StatelessWidget {
                         value: examTypeLabel,
                         onTap: () => _pickExamType(context, appState),
                       ),
+                      _row(
+                        context,
+                        label: '解いている試験',
+                        value: '',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ExamSelectorScreen(),
+                          ),
+                        ),
+                      ),
                       _sectionLabel('外観'),
                       _row(
                         context,
@@ -280,7 +292,13 @@ class SettingsScreen extends StatelessWidget {
                         context,
                         label: '購入プラン',
                         value: appState.purchased ? '買い切り版 購入済み' : '無料版',
-                        onTap: null,
+                        onTap: appState.purchased
+                            ? null
+                            : () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const PaywallScreen(),
+                                ),
+                              ),
                       ),
                       const Padding(
                         padding: EdgeInsets.only(top: 4, bottom: 4, left: 4),
