@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
 import '../../data/database/app_database.dart';
+import '../../providers/app_state.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
@@ -56,6 +57,7 @@ class ReviewDayHomeScreen extends StatelessWidget {
     final day = session.day;
     final today = DateTime.now();
     final dateStr = '${today.month}月${today.day}日';
+    final dailyN = context.watch<AppState>().dailyQuestionCount;
 
     return Scaffold(
       backgroundColor: ZenColors.bg,
@@ -198,7 +200,7 @@ class ReviewDayHomeScreen extends StatelessWidget {
                                       CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.alphabetic,
                                   children: [
-                                    Text('9', style: ZenText.bigNumber()),
+                                    Text('$dailyN', style: ZenText.bigNumber()),
                                     const SizedBox(width: 10),
                                     const Text(
                                       '問',
@@ -219,9 +221,9 @@ class ReviewDayHomeScreen extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                                const Text(
-                                  'Day 1〜5 で間違えた問題のうち、\nミス率が高かった 9問を選びました。',
-                                  style: TextStyle(
+                                Text(
+                                  'Day 1〜5 で間違えた問題のうち、\nミス率が高かった $dailyN問を選びました。',
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     color: ZenColors.inkSub,
                                     height: 1.75,
@@ -229,7 +231,7 @@ class ReviewDayHomeScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
-                                  label: '復習の 9問をはじめる',
+                                  label: '復習の $dailyN問をはじめる',
                                   onPressed: () => _startReview(context),
                                 ),
                               ],

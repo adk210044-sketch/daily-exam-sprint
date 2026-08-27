@@ -99,7 +99,20 @@ class QuestionScreen extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-                          child: CategoryChip(category: q.categoryName),
+                          child: Row(
+                            children: [
+                              CategoryChip(category: q.categoryName),
+                              const SizedBox(width: 8),
+                              Text(
+                                q.year,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: ZenColors.inkMute,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),

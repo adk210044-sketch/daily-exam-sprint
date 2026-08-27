@@ -43,6 +43,7 @@ class _OnbGoalScreenState extends State<OnbGoalScreen> {
   @override
   Widget build(BuildContext context) {
     final weekdayNames = ['月', '火', '水', '木', '金', '土', '日'];
+    final dailyN = context.watch<AppState>().dailyQuestionCount;
     return Scaffold(
       backgroundColor: ZenColors.bg,
       body: SafeArea(
@@ -230,7 +231,7 @@ class _OnbGoalScreenState extends State<OnbGoalScreen> {
                                     color: ZenColors.accentDeep,
                                   ),
                                   children: [
-                                    TextSpan(text: '${daysLeft * 9}'),
+                                    TextSpan(text: '${daysLeft * dailyN}'),
                                     const TextSpan(
                                       text: '問',
                                       style: TextStyle(

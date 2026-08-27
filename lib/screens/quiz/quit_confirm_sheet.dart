@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../providers/app_state.dart';
 import '../../widgets/zen_widgets.dart';
 
 /// 中断確認 (ZenQuitConfirm) — ボトムシート形式
 Future<bool?> showQuitConfirmSheet(BuildContext context) {
+  final dailyN = context.read<AppState>().dailyQuestionCount;
   return showModalBottomSheet<bool>(
     context: context,
     backgroundColor: Colors.transparent,
@@ -28,10 +31,10 @@ Future<bool?> showQuitConfirmSheet(BuildContext context) {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Text(
-              '今日の 9問を中断しますか？',
+            Text(
+              '今日の $dailyN問を中断しますか？',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: ZenColors.ink,

@@ -133,6 +133,14 @@ class FeedbackScreen extends StatelessWidget {
                             color: ZenColors.ink,
                           ),
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${q.year} · ${q.categoryName}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: ZenColors.inkMute,
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         Text.rich(
                           TextSpan(

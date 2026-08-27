@@ -45,6 +45,10 @@ class AppState extends ChangeNotifier {
 
   Future<void> setExamType(String type) async {
     await settingsRepo.setExamType(type);
+    // 試験区分を切り替えたら、古い試験区分のセッションが再利用されないよう
+    // currentSessionId をクリアする。HomeScreen が次回ロード時に
+    // 新しい examType に一致するセッションを自動選択する。
+    await settingsRepo.setCurrentSessionId(null);
     await refreshSettings();
   }
 

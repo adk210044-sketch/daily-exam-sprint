@@ -24,6 +24,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Map<String, int> byCategory = {};
   bool loading = true;
 
+  int get _dailyN => context.read<AppState>().dailyQuestionCount;
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +68,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<void> _startReview() async {
     final appState = context.read<AppState>();
     final quiz = context.read<QuizSessionProvider>();
-    await quiz.startReview(purchased: appState.purchased);
+    await quiz.startReview(
+      purchased: appState.purchased,
+      dailyCount: appState.dailyQuestionCount,
+    );
     if (!mounted) return;
     await Navigator.of(
       context,
@@ -89,12 +94,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(24, 20, 24, 0),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'REVIEW  ·  FOREVER FREE',
                       style: TextStyle(
                         fontSize: 10,
@@ -102,10 +107,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         color: ZenColors.inkMute,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Text(
-                      '苦手だけを、9問',
-                      style: TextStyle(
+                      '苦手だけを、$_dailyN問',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w400,
                         color: ZenColors.ink,
@@ -153,10 +158,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          '今のところ、取りこぼしはありません。\n今日の9問に集中しましょう。',
+                        Text(
+                          '今のところ、取りこぼしはありません。\n今日の$_dailyN問に集中しましょう。',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
                             color: ZenColors.inkSub,
                             height: 1.9,
@@ -165,7 +170,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         const SizedBox(height: 32),
                         ZenPrimaryButton(
                           height: 52,
-                          label: '今日の 9問へ',
+                          label: '今日の $_dailyN問へ',
                           onPressed: () => _onTabTap('home'),
                         ),
                       ],
@@ -193,12 +198,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(24, 20, 24, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'REVIEW  ·  FOREVER FREE',
                             style: TextStyle(
                               fontSize: 10,
@@ -206,10 +211,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               color: ZenColors.inkMute,
                             ),
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text(
-                            '苦手だけを、9問',
-                            style: TextStyle(
+                            '苦手だけを、$_dailyN問',
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w400,
                               color: ZenColors.ink,
@@ -282,9 +287,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'この中から、あなたに合わせて 9問を\nランダムに選んで出題します。',
-                                  style: TextStyle(
+                                Text(
+                                  'この中から、あなたに合わせて $_dailyN問を\nランダムに選んで出題します。',
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     color: ZenColors.inkSub,
                                     height: 1.6,
@@ -293,7 +298,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
                                   height: 52,
-                                  label: '苦手 9問をはじめる',
+                                  label: '苦手 $_dailyN問をはじめる',
                                   onPressed: _startReview,
                                 ),
                               ],

@@ -52,7 +52,10 @@ class QuizSessionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> startReview({required bool purchased}) async {
+  Future<void> startReview({
+    required bool purchased,
+    required int dailyCount,
+  }) async {
     isLoading = true;
     notifyListeners();
 
@@ -60,7 +63,10 @@ class QuizSessionProvider extends ChangeNotifier {
     sessionId = null;
     day = 0;
     attempt = 1;
-    questions = await reviewRepo.buildReviewSet(purchased: purchased);
+    questions = await reviewRepo.buildReviewSet(
+      purchased: purchased,
+      dailyCount: dailyCount,
+    );
     _resetProgress();
 
     isLoading = false;

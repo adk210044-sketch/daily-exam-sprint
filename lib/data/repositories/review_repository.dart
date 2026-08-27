@@ -41,12 +41,16 @@ class ReviewRepository {
     return result;
   }
 
-  /// 苦手復習9問 (無料版) or 無制限 (有料版) をランダム抽出
-  Future<List<QuizQuestion>> buildReviewSet({required bool purchased}) async {
+  /// 苦手復習N問 (無料版) or 無制限 (有料版) をランダム抽出
+  /// N = examType に応じた1日あたり問題数 (第1種=9 / 第2種=6)
+  Future<List<QuizQuestion>> buildReviewSet({
+    required bool purchased,
+    required int dailyCount,
+  }) async {
     final ids = await getMissedQuestionIds();
     if (ids.isEmpty) return [];
     ids.shuffle(Random());
-    final limited = purchased ? ids : ids.take(9).toList();
+    final limited = purchased ? ids : ids.take(dailyCount).toList();
     final rows = await (db.select(
       db.questions,
     )..where((t) => t.id.isIn(limited))).get();

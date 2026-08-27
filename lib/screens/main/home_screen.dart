@@ -166,9 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: ZenText.kicker(letterSpacing: 3.0),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                '今日も、9問だけ。',
-                                style: TextStyle(
+                              Text(
+                                '今日も、$dailyN問だけ。',
+                                style: const TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.4,

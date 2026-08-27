@@ -66,7 +66,19 @@ void showQuestionReviewSheet(
                                     style: ZenText.kicker(letterSpacing: 2.0),
                                   ),
                                   const SizedBox(height: 6),
-                                  CategoryChip(category: q.categoryName),
+                                  Row(
+                                    children: [
+                                      CategoryChip(category: q.categoryName),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        q.year,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: ZenColors.inkMute,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

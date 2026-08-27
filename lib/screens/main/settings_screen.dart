@@ -275,12 +275,23 @@ class SettingsScreen extends StatelessWidget {
                         value: fontSizeLabel,
                         onTap: () => _pickFontSize(context, appState),
                       ),
-                      _sectionLabel('アカウント'),
+                      _sectionLabel('購入について'),
                       _row(
                         context,
-                        label: 'サブスク管理',
-                        value: appState.purchased ? '購入済み' : '未購入',
+                        label: '購入プラン',
+                        value: appState.purchased ? '買い切り版 購入済み' : '無料版',
                         onTap: null,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4, bottom: 4, left: 4),
+                        child: Text(
+                          '本アプリは買い切り課金制です。サブスクリプション(自動更新の定期課金)はありません。',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: ZenColors.inkMute,
+                            height: 1.6,
+                          ),
+                        ),
                       ),
                       _sectionLabel(''),
                       _row(context, label: '利用規約', value: '', onTap: null),

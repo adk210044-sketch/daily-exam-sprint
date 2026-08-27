@@ -48,6 +48,7 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dailyN = context.watch<AppState>().dailyQuestionCount;
     return Scaffold(
       backgroundColor: ZenColors.bg,
       body: SafeArea(
@@ -62,9 +63,9 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
                   children: [
                     Text('STEP 4 OF 6', style: ZenText.kicker()),
                     const SizedBox(height: 12),
-                    const Text(
-                      'いつ、9問を\n解きますか？',
-                      style: TextStyle(
+                    Text(
+                      'いつ、$dailyN問を\n解きますか？',
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w500,
                         height: 1.4,

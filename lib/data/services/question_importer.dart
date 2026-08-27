@@ -26,6 +26,15 @@ class QuestionImporter {
     final companions = <QuestionsCompanion>[];
     for (final item in list) {
       final map = item as Map<String, dynamic>;
+
+      // 法改正等により単一正解が崩れた問題(correctIndexesが複数)は
+      // 自動採点が成立しないため出題対象から除外する。
+      // (該当分は Day分割時に前日までの問題を再掲して穴埋めする)
+      final correctIndexes = map['correctIndexes'] as List<dynamic>?;
+      if (correctIndexes != null && correctIndexes.length > 1) {
+        continue;
+      }
+
       final choices = (map['choices'] as List<dynamic>)
           .map((e) => e.toString())
           .toList();

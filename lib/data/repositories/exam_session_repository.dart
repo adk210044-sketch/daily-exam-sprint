@@ -51,6 +51,10 @@ class ExamSessionRepository {
   }
 
   /// Day1-5 の問題セットを取得 (未生成なら buildDaySets() で生成して保存)
+  ///
+  /// [dayQuestionIdsJson] には各Dayの「問題ID配列」を保存する。
+  /// 最終日(Day5)は前日までの問題が再掲されるため、同一IDが他Dayにも
+  /// 出現し得る (これは仕様上正しい挙動)。
   Future<List<List<QuizQuestion>>> ensureDaySets(ExamSession session) async {
     final allQuestions = await _fullQuestionsFor(session);
     final byId = {for (final q in allQuestions) q.id: q};
@@ -73,6 +77,8 @@ class ExamSessionRepository {
     }
 
     // buildDaySets() 相当のロジックで生成
+    // (除外済み問題=法改正等で単一正解が崩れたもの は既にDBインポート時に
+    //  取り除かれているため、ここで取得する問題は全て出題可能なもの)
     final rows =
         await (db.select(db.questions)..where(
               (t) =>
@@ -80,7 +86,12 @@ class ExamSessionRepository {
                   t.year.equals(session.year),
             ))
             .get();
-    final sets = DaySplitService.buildDaySets(rows, days: 5);
+    final dailyCount = DaySplitService.dailyCountForExamType(session.examType);
+    final sets = DaySplitService.buildDaySets(
+      rows,
+      dailyCount: dailyCount,
+      days: 5,
+    );
 
     final map = <String, List<String>>{};
     for (var i = 0; i < sets.length; i++) {
@@ -108,8 +119,10 @@ class ExamSessionRepository {
     }
   }
 
-  /// Day6-7 用のミス率TOP9を生成 (未生成なら計算して保存)
+  /// Day6-7 用のミス率TOPNを生成 (未生成なら計算して保存)
+  /// N = examType に応じた1日あたり問題数 (第1種=9 / 第2種=6)
   Future<List<QuizQuestion>> ensureReviewSet(ExamSession session) async {
+    final n = DaySplitService.dailyCountForExamType(session.examType);
     if (session.reviewQuestionIdsJson != null) {
       final ids = (jsonDecode(session.reviewQuestionIdsJson!) as List<dynamic>)
           .map((e) => e.toString())
@@ -152,15 +165,15 @@ class ExamSessionRepository {
             .toList()
           ..sort((a, b) => b.rate.compareTo(a.rate));
 
-    var selectedIds = missRates.take(9).map((e) => e.id).toList();
+    var selectedIds = missRates.take(n).map((e) => e.id).toList();
 
-    // ミスが9問未満の場合は、Day1-5の問題からランダムに補充
-    if (selectedIds.length < 9) {
+    // ミスがN問未満の場合は、Day1-5の問題からランダムに補充
+    if (selectedIds.length < n) {
       final allDaySets = await ensureDaySets(session);
       final allIds = allDaySets.expand((d) => d.map((q) => q.id)).toSet();
       final remaining = allIds.difference(selectedIds.toSet()).toList()
         ..shuffle(Random());
-      selectedIds = [...selectedIds, ...remaining.take(9 - selectedIds.length)];
+      selectedIds = [...selectedIds, ...remaining.take(n - selectedIds.length)];
     }
 
     await (db.update(
