@@ -329,6 +329,19 @@ class ExamSessionRepository {
     );
   }
 
+  /// 現在のセッションの Day1-7 それぞれの最高スコア (%) を取得する。
+  /// (Home画面の週間進捗バー用。未着手の Day はキーが存在しない)
+  Future<Map<int, int>> getBestScoresByDay(String sessionId) async {
+    final rows = await (db.select(
+      db.dailyProgress,
+    )..where((t) => t.sessionId.equals(sessionId))).get();
+    final best = <int, int>{};
+    for (final p in rows) {
+      best[p.day] = max(best[p.day] ?? 0, p.score);
+    }
+    return best;
+  }
+
   /// 直近7日間のスコア履歴 (Home画面のミニバー用)
   Future<List<CalendarMark>> getRecentMarks({int days = 7}) async {
     final now = DateTime.now();

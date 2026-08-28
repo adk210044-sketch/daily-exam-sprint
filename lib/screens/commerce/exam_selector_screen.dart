@@ -219,7 +219,7 @@ class _ExamSelectorScreenState extends State<ExamSelectorScreen> {
                             crossAxisCount: 2,
                             mainAxisSpacing: 10,
                             crossAxisSpacing: 10,
-                            childAspectRatio: 0.92,
+                            childAspectRatio: 1.35,
                           ),
                       itemBuilder: (context, i) {
                         final session = filtered[i];
@@ -423,27 +423,6 @@ class _ExamSessionCard extends StatelessWidget {
                       height: 1.25,
                     ),
                   ),
-                  if (s.isLatest)
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: ZenColors.accent,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: const Text(
-                        '直近 · 無料',
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: ZenColors.accentInk,
-                          letterSpacing: 0.6,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -468,7 +447,7 @@ class _ExamSessionCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         statusWidget,
-        const Spacer(),
+        const SizedBox(height: 8),
         if (!isLocked && s.status != 'not_started') ...[
           Wrap(
             spacing: 8,

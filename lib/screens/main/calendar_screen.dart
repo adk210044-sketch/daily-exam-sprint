@@ -147,8 +147,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       cells.add(null);
     }
 
-    final hanamaruCount = marksByDate.values.where((m) => m.hanamaru).length;
-
     return Scaffold(
       backgroundColor: ZenColors.bg,
       body: SafeArea(
@@ -194,66 +192,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '連続',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: ZenColors.inkSub,
-                          letterSpacing: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '$streak',
-                              style: const TextStyle(
-                                fontSize: 56,
-                                fontWeight: FontWeight.w200,
-                                letterSpacing: -1.5,
-                                color: ZenColors.ink,
-                              ),
-                            ),
-                            const TextSpan(
-                              text: '日',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: ZenColors.inkSub,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    '連続',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: ZenColors.inkSub,
+                      letterSpacing: 1.6,
+                    ),
                   ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        '今月の ◎',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: ZenColors.inkSub,
-                          letterSpacing: 1.6,
+                  const SizedBox(height: 2),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '$streak',
+                          style: const TextStyle(
+                            fontSize: 56,
+                            fontWeight: FontWeight.w200,
+                            letterSpacing: -1.5,
+                            color: ZenColors.ink,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '◎' * hanamaruCount.clamp(0, 5),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          color: ZenColors.gold,
-                          letterSpacing: 1.0,
+                        const TextSpan(
+                          text: '日',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: ZenColors.inkSub,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -317,58 +288,57 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         );
                                       }).toList(),
                                     ),
-                                    if (examInfo != null)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 2,
-                                          bottom: 2,
-                                        ),
-                                        child: Row(
-                                          children: List.generate(7, (i) {
-                                            final showLine =
-                                                i >= examInfo.startIndex;
-                                            final showLabel =
-                                                i == examInfo.startIndex;
-                                            return Expanded(
-                                              child: SizedBox(
-                                                height: 14,
-                                                child: Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    if (showLine)
-                                                      Container(
-                                                        height: 7,
-                                                        color: const Color(
-                                                          0xFFC8C8C0,
-                                                        ),
-                                                      ),
-                                                    if (showLabel)
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 3,
-                                                            ),
-                                                        color: ZenColors.bg,
-                                                        child: Text(
-                                                          examInfo.shortLabel,
-                                                          style: const TextStyle(
-                                                            fontSize: 9,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700,
-                                                            color: ZenColors
-                                                                .inkSub,
-                                                            letterSpacing: 0.2,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          }),
-                                        ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 2,
+                                        bottom: 2,
                                       ),
+                                      child: Row(
+                                        children: List.generate(7, (i) {
+                                          final showLine = examInfo != null &&
+                                              i >= examInfo.startIndex;
+                                          final showLabel = examInfo != null &&
+                                              i == examInfo.startIndex;
+                                          return Expanded(
+                                            child: SizedBox(
+                                              height: 14,
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  if (showLine)
+                                                    Container(
+                                                      height: 7,
+                                                      color: const Color(
+                                                        0xFFC8C8C0,
+                                                      ),
+                                                    ),
+                                                  if (showLabel)
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 3,
+                                                          ),
+                                                      color: ZenColors.bg,
+                                                      child: Text(
+                                                        examInfo.shortLabel,
+                                                        style: const TextStyle(
+                                                          fontSize: 9,
+                                                          fontWeight:
+                                                              FontWeight
+                                                                  .w700,
+                                                          color: ZenColors
+                                                              .inkSub,
+                                                          letterSpacing: 0.2,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               );

@@ -25,8 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   ExamSession? _currentSession;
-  List<CalendarMark> _recentMarks = [];
-  int _streak = 0;
+  Map<int, int> _dayScores = {};
   bool _loading = true;
   bool _howOpen = false;
 
@@ -59,14 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    final marks = await appState.examRepo.getRecentMarks(days: 7);
-    final streak = await appState.examRepo.getStreakDays();
+    final dayScores = session != null
+        ? await appState.examRepo.getBestScoresByDay(session.id)
+        : <int, int>{};
 
     if (!mounted) return;
     setState(() {
       _currentSession = session;
-      _recentMarks = marks;
-      _streak = streak;
+      _dayScores = dayScores;
       _loading = false;
     });
   }
@@ -299,34 +298,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ],
                                 ),
                               ),
-                              Flexible(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      child: ZenTextLink(
-                                        label: '試験を選ぶ',
-                                        color: ZenColors.accent,
-                                        onPressed: () => Navigator.of(
-                                          context,
-                                        ).push(
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const ExamSelectorScreen(),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Flexible(
-                                      child: ZenTextLink(
-                                        label: 'カレンダー',
-                                        color: ZenColors.accent,
-                                        onPressed: () =>
-                                            _onTabTap('calendar'),
-                                      ),
-                                    ),
-                                  ],
+                              ZenTextLink(
+                                label: '試験を選ぶ',
+                                color: ZenColors.accent,
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const ExamSelectorScreen(),
+                                  ),
                                 ),
                               ),
                             ],
@@ -540,25 +519,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                   const SizedBox(height: 14),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '前回 · ${session.avgScore ?? '-'} / 100',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: ZenColors.inkMute,
-                                        ),
-                                      ),
-                                      Text(
-                                        '◎ × ${session.hanamaruDays}',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: ZenColors.inkMute,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    '前回 · ${session.avgScore ?? '-'} / 100',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: ZenColors.inkMute,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -570,10 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Score history
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
-                      child: _ScoreHistoryRow(
-                        marks: _recentMarks,
-                        streak: _streak,
-                      ),
+                      child: _ScoreHistoryRow(dayScores: _dayScores),
                     ),
                   ],
                 ),
@@ -592,50 +555,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// 今回の試験サイクル (Day1-7) の各日スコアを表示する週間進捗バー。
+/// 曜日 (月〜日) ではなく、試験開始日を起点とした Day1〜7 で表示する
+/// (アプリはどの曜日からでも開始できるため)。
 class _ScoreHistoryRow extends StatelessWidget {
-  final List<CalendarMark> marks;
-  final int streak;
+  final Map<int, int> dayScores;
 
-  const _ScoreHistoryRow({required this.marks, required this.streak});
+  const _ScoreHistoryRow({required this.dayScores});
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now();
-    final byDate = <String, CalendarMark>{};
-    for (final m in marks) {
-      byDate[DateFormat('yyyy-MM-dd').format(m.date)] = m;
-    }
-    final weekdayLabels = ['月', '火', '水', '木', '金', '土', '日'];
-    final days = List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
-    final avg = marks.isEmpty
+    final scored = dayScores.values.toList();
+    final avg = scored.isEmpty
         ? 0
-        : (marks.map((m) => m.score).reduce((a, b) => a + b) / marks.length)
-              .round();
-    final hanamaruCount = marks.where((m) => m.hanamaru).length;
+        : (scored.reduce((a, b) => a + b) / scored.length).round();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'この 7日 · 平均 $avg%',
-              style: const TextStyle(
-                fontSize: 11,
-                letterSpacing: 1.6,
-                color: ZenColors.inkSub,
-              ),
-            ),
-            Text(
-              '◎ × $hanamaruCount',
-              style: const TextStyle(
-                fontSize: 11,
-                color: ZenColors.gold,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ],
+        Text(
+          '今回の試験 · 平均 $avg%',
+          style: const TextStyle(
+            fontSize: 11,
+            letterSpacing: 1.6,
+            color: ZenColors.inkSub,
+          ),
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -643,12 +587,8 @@ class _ScoreHistoryRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: List.generate(7, (i) {
-              final d = days[i];
-              final isToday =
-                  DateFormat('yyyy-MM-dd').format(d) ==
-                  DateFormat('yyyy-MM-dd').format(today);
-              final mark = byDate[DateFormat('yyyy-MM-dd').format(d)];
-              final score = mark?.score;
+              final day = i + 1;
+              final score = dayScores[day];
               final h = score != null ? (score / 100) * 40 : 6.0;
               return Expanded(
                 child: Padding(
@@ -670,26 +610,32 @@ class _ScoreHistoryRow extends StatelessWidget {
                       Container(
                         height: h,
                         decoration: BoxDecoration(
-                          color: isToday && score == null
+                          color: score == null
                               ? Colors.transparent
                               : (score == 100
                                     ? ZenColors.gold
                                     : ZenColors.accent),
                           borderRadius: BorderRadius.circular(2),
-                          border: isToday && score == null
+                          border: score == null
                               ? Border.all(color: ZenColors.line, width: 1.5)
                               : null,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        weekdayLabels[i],
-                        style: TextStyle(
+                        score != null ? '$score%' : '-',
+                        style: const TextStyle(
+                          fontSize: 8,
+                          color: ZenColors.inkMute,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Day$day',
+                        style: const TextStyle(
                           fontSize: 9,
-                          color: isToday ? ZenColors.accent : ZenColors.inkMute,
-                          fontWeight: isToday
-                              ? FontWeight.w700
-                              : FontWeight.w400,
+                          color: ZenColors.inkMute,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
