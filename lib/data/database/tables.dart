@@ -99,7 +99,6 @@ class UserSettings extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();
   TextColumn get examType => text().withDefault(const Constant('type1'))();
   TextColumn get reminderTime => text().withDefault(const Constant('08:15'))();
-  DateTimeColumn get goalDate => dateTime().nullable()();
   TextColumn get fontSize => text().withDefault(const Constant('medium'))();
   BoolColumn get purchased => boolean().withDefault(const Constant(false))();
   TextColumn get currentSessionId => text().nullable()();

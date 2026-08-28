@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/zen_tokens.dart';
 
-/// Onboarding 6ステップの進捗インジケータ (current は 0-indexed)
+/// Onboarding 5ステップの進捗インジケータ (current は 0-indexed)
 class OnbSteps extends StatelessWidget {
   final int current;
 
@@ -14,7 +14,7 @@ class OnbSteps extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(6, (i) {
+        children: List.generate(5, (i) {
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 3),
             width: i == current ? 24 : 6,

@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../core/theme/zen_tokens.dart';
 import '../../providers/app_state.dart';
 import '../../widgets/zen_widgets.dart';
-import 'onb_goal_screen.dart';
+import 'onb_notification_permission_screen.dart';
 import 'onb_steps.dart';
 
-/// リマインダー設定 (ZenOnboarding) — Step 4/6 (プリセット4択 + カスタム時刻)
+/// リマインダー設定 (ZenOnboarding) — Step 4/5 (プリセット4択 + カスタム時刻)
 class OnbReminderScreen extends StatefulWidget {
   const OnbReminderScreen({super.key});
 
@@ -61,7 +61,7 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('STEP 4 OF 6', style: ZenText.kicker()),
+                    Text('STEP 4 OF 5', style: ZenText.kicker()),
                     const SizedBox(height: 12),
                     Text(
                       'いつ、$dailyN問を\n解きますか？',
@@ -324,7 +324,8 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
                       if (context.mounted) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const OnbGoalScreen(),
+                            builder: (_) =>
+                                const OnbNotificationPermissionScreen(),
                           ),
                         );
                       }
@@ -337,7 +338,8 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const OnbGoalScreen(),
+                          builder: (_) =>
+                              const OnbNotificationPermissionScreen(),
                         ),
                       );
                     },

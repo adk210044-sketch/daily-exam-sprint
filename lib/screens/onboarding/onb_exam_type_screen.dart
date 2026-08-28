@@ -7,7 +7,7 @@ import '../../widgets/zen_widgets.dart';
 import 'onb_reminder_screen.dart';
 import 'onb_steps.dart';
 
-/// 試験区分選択 (ZenOnbExamType) — Step 3/6
+/// 試験区分選択 (ZenOnbExamType) — Step 3/5
 class OnbExamTypeScreen extends StatefulWidget {
   const OnbExamTypeScreen({super.key});
 
@@ -32,7 +32,7 @@ class _OnbExamTypeScreenState extends State<OnbExamTypeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('STEP 3 OF 6', style: ZenText.kicker()),
+                    Text('STEP 3 OF 5', style: ZenText.kicker()),
                     const SizedBox(height: 12),
                     const Text(
                       'どちらの\n試験を受けますか？',

@@ -150,11 +150,6 @@ class AppState extends ChangeNotifier {
     await refreshSettings();
   }
 
-  Future<void> setGoalDate(DateTime? date) async {
-    await settingsRepo.setGoalDate(date);
-    await refreshSettings();
-  }
-
   Future<void> completeOnboarding() async {
     await settingsRepo.setOnboardingComplete(true);
     await refreshSettings();

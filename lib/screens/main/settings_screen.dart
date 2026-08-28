@@ -9,6 +9,7 @@ import '../commerce/exam_selector_screen.dart';
 import '../commerce/paywall_screen.dart';
 import 'calendar_screen.dart';
 import 'home_screen.dart';
+import 'legal_text_screen.dart';
 import 'review_screen.dart';
 
 /// 設定 (ZenSettings)
@@ -337,8 +338,32 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                       _sectionLabel(''),
-                      _row(context, label: '利用規約', value: '', onTap: null),
-                      _row(context, label: 'プライバシー', value: '', onTap: null),
+                      _row(
+                        context,
+                        label: '利用規約',
+                        value: '',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LegalTextScreen(
+                              title: '利用規約',
+                              body: kTermsOfServiceText,
+                            ),
+                          ),
+                        ),
+                      ),
+                      _row(
+                        context,
+                        label: 'プライバシー',
+                        value: '',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LegalTextScreen(
+                              title: 'プライバシーポリシー',
+                              body: kPrivacyPolicyText,
+                            ),
+                          ),
+                        ),
+                      ),
                       _row(
                         context,
                         label: 'このアプリについて',

@@ -2961,17 +2961,6 @@ class $UserSettingsTable extends UserSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('08:15'),
   );
-  static const VerificationMeta _goalDateMeta = const VerificationMeta(
-    'goalDate',
-  );
-  @override
-  late final GeneratedColumn<DateTime> goalDate = GeneratedColumn<DateTime>(
-    'goal_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _fontSizeMeta = const VerificationMeta(
     'fontSize',
   );
@@ -3043,7 +3032,6 @@ class $UserSettingsTable extends UserSettings
     id,
     examType,
     reminderTime,
-    goalDate,
     fontSize,
     purchased,
     currentSessionId,
@@ -3078,12 +3066,6 @@ class $UserSettingsTable extends UserSettings
           data['reminder_time']!,
           _reminderTimeMeta,
         ),
-      );
-    }
-    if (data.containsKey('goal_date')) {
-      context.handle(
-        _goalDateMeta,
-        goalDate.isAcceptableOrUnknown(data['goal_date']!, _goalDateMeta),
       );
     }
     if (data.containsKey('font_size')) {
@@ -3146,10 +3128,6 @@ class $UserSettingsTable extends UserSettings
         DriftSqlType.string,
         data['${effectivePrefix}reminder_time'],
       )!,
-      goalDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}goal_date'],
-      ),
       fontSize: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}font_size'],
@@ -3183,7 +3161,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
   final int id;
   final String examType;
   final String reminderTime;
-  final DateTime? goalDate;
   final String fontSize;
   final bool purchased;
   final String? currentSessionId;
@@ -3193,7 +3170,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     required this.id,
     required this.examType,
     required this.reminderTime,
-    this.goalDate,
     required this.fontSize,
     required this.purchased,
     this.currentSessionId,
@@ -3206,9 +3182,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     map['id'] = Variable<int>(id);
     map['exam_type'] = Variable<String>(examType);
     map['reminder_time'] = Variable<String>(reminderTime);
-    if (!nullToAbsent || goalDate != null) {
-      map['goal_date'] = Variable<DateTime>(goalDate);
-    }
     map['font_size'] = Variable<String>(fontSize);
     map['purchased'] = Variable<bool>(purchased);
     if (!nullToAbsent || currentSessionId != null) {
@@ -3224,9 +3197,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       id: Value(id),
       examType: Value(examType),
       reminderTime: Value(reminderTime),
-      goalDate: goalDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(goalDate),
       fontSize: Value(fontSize),
       purchased: Value(purchased),
       currentSessionId: currentSessionId == null && nullToAbsent
@@ -3246,7 +3216,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       id: serializer.fromJson<int>(json['id']),
       examType: serializer.fromJson<String>(json['examType']),
       reminderTime: serializer.fromJson<String>(json['reminderTime']),
-      goalDate: serializer.fromJson<DateTime?>(json['goalDate']),
       fontSize: serializer.fromJson<String>(json['fontSize']),
       purchased: serializer.fromJson<bool>(json['purchased']),
       currentSessionId: serializer.fromJson<String?>(json['currentSessionId']),
@@ -3263,7 +3232,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       'id': serializer.toJson<int>(id),
       'examType': serializer.toJson<String>(examType),
       'reminderTime': serializer.toJson<String>(reminderTime),
-      'goalDate': serializer.toJson<DateTime?>(goalDate),
       'fontSize': serializer.toJson<String>(fontSize),
       'purchased': serializer.toJson<bool>(purchased),
       'currentSessionId': serializer.toJson<String?>(currentSessionId),
@@ -3276,7 +3244,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     int? id,
     String? examType,
     String? reminderTime,
-    Value<DateTime?> goalDate = const Value.absent(),
     String? fontSize,
     bool? purchased,
     Value<String?> currentSessionId = const Value.absent(),
@@ -3286,7 +3253,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     id: id ?? this.id,
     examType: examType ?? this.examType,
     reminderTime: reminderTime ?? this.reminderTime,
-    goalDate: goalDate.present ? goalDate.value : this.goalDate,
     fontSize: fontSize ?? this.fontSize,
     purchased: purchased ?? this.purchased,
     currentSessionId: currentSessionId.present
@@ -3302,7 +3268,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       reminderTime: data.reminderTime.present
           ? data.reminderTime.value
           : this.reminderTime,
-      goalDate: data.goalDate.present ? data.goalDate.value : this.goalDate,
       fontSize: data.fontSize.present ? data.fontSize.value : this.fontSize,
       purchased: data.purchased.present ? data.purchased.value : this.purchased,
       currentSessionId: data.currentSessionId.present
@@ -3323,7 +3288,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           ..write('id: $id, ')
           ..write('examType: $examType, ')
           ..write('reminderTime: $reminderTime, ')
-          ..write('goalDate: $goalDate, ')
           ..write('fontSize: $fontSize, ')
           ..write('purchased: $purchased, ')
           ..write('currentSessionId: $currentSessionId, ')
@@ -3338,7 +3302,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     id,
     examType,
     reminderTime,
-    goalDate,
     fontSize,
     purchased,
     currentSessionId,
@@ -3352,7 +3315,6 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           other.id == this.id &&
           other.examType == this.examType &&
           other.reminderTime == this.reminderTime &&
-          other.goalDate == this.goalDate &&
           other.fontSize == this.fontSize &&
           other.purchased == this.purchased &&
           other.currentSessionId == this.currentSessionId &&
@@ -3364,7 +3326,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
   final Value<int> id;
   final Value<String> examType;
   final Value<String> reminderTime;
-  final Value<DateTime?> goalDate;
   final Value<String> fontSize;
   final Value<bool> purchased;
   final Value<String?> currentSessionId;
@@ -3374,7 +3335,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     this.id = const Value.absent(),
     this.examType = const Value.absent(),
     this.reminderTime = const Value.absent(),
-    this.goalDate = const Value.absent(),
     this.fontSize = const Value.absent(),
     this.purchased = const Value.absent(),
     this.currentSessionId = const Value.absent(),
@@ -3385,7 +3345,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     this.id = const Value.absent(),
     this.examType = const Value.absent(),
     this.reminderTime = const Value.absent(),
-    this.goalDate = const Value.absent(),
     this.fontSize = const Value.absent(),
     this.purchased = const Value.absent(),
     this.currentSessionId = const Value.absent(),
@@ -3396,7 +3355,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     Expression<int>? id,
     Expression<String>? examType,
     Expression<String>? reminderTime,
-    Expression<DateTime>? goalDate,
     Expression<String>? fontSize,
     Expression<bool>? purchased,
     Expression<String>? currentSessionId,
@@ -3407,7 +3365,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
       if (id != null) 'id': id,
       if (examType != null) 'exam_type': examType,
       if (reminderTime != null) 'reminder_time': reminderTime,
-      if (goalDate != null) 'goal_date': goalDate,
       if (fontSize != null) 'font_size': fontSize,
       if (purchased != null) 'purchased': purchased,
       if (currentSessionId != null) 'current_session_id': currentSessionId,
@@ -3421,7 +3378,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     Value<int>? id,
     Value<String>? examType,
     Value<String>? reminderTime,
-    Value<DateTime?>? goalDate,
     Value<String>? fontSize,
     Value<bool>? purchased,
     Value<String?>? currentSessionId,
@@ -3432,7 +3388,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
       id: id ?? this.id,
       examType: examType ?? this.examType,
       reminderTime: reminderTime ?? this.reminderTime,
-      goalDate: goalDate ?? this.goalDate,
       fontSize: fontSize ?? this.fontSize,
       purchased: purchased ?? this.purchased,
       currentSessionId: currentSessionId ?? this.currentSessionId,
@@ -3452,9 +3407,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     }
     if (reminderTime.present) {
       map['reminder_time'] = Variable<String>(reminderTime.value);
-    }
-    if (goalDate.present) {
-      map['goal_date'] = Variable<DateTime>(goalDate.value);
     }
     if (fontSize.present) {
       map['font_size'] = Variable<String>(fontSize.value);
@@ -3480,7 +3432,6 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
           ..write('id: $id, ')
           ..write('examType: $examType, ')
           ..write('reminderTime: $reminderTime, ')
-          ..write('goalDate: $goalDate, ')
           ..write('fontSize: $fontSize, ')
           ..write('purchased: $purchased, ')
           ..write('currentSessionId: $currentSessionId, ')
@@ -5289,7 +5240,6 @@ typedef $$UserSettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String> examType,
       Value<String> reminderTime,
-      Value<DateTime?> goalDate,
       Value<String> fontSize,
       Value<bool> purchased,
       Value<String?> currentSessionId,
@@ -5301,7 +5251,6 @@ typedef $$UserSettingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> examType,
       Value<String> reminderTime,
-      Value<DateTime?> goalDate,
       Value<String> fontSize,
       Value<bool> purchased,
       Value<String?> currentSessionId,
@@ -5330,11 +5279,6 @@ class $$UserSettingsTableFilterComposer
 
   ColumnFilters<String> get reminderTime => $composableBuilder(
     column: $table.reminderTime,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get goalDate => $composableBuilder(
-    column: $table.goalDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5388,11 +5332,6 @@ class $$UserSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get goalDate => $composableBuilder(
-    column: $table.goalDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get fontSize => $composableBuilder(
     column: $table.fontSize,
     builder: (column) => ColumnOrderings(column),
@@ -5438,9 +5377,6 @@ class $$UserSettingsTableAnnotationComposer
     column: $table.reminderTime,
     builder: (column) => column,
   );
-
-  GeneratedColumn<DateTime> get goalDate =>
-      $composableBuilder(column: $table.goalDate, builder: (column) => column);
 
   GeneratedColumn<String> get fontSize =>
       $composableBuilder(column: $table.fontSize, builder: (column) => column);
@@ -5498,7 +5434,6 @@ class $$UserSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> examType = const Value.absent(),
                 Value<String> reminderTime = const Value.absent(),
-                Value<DateTime?> goalDate = const Value.absent(),
                 Value<String> fontSize = const Value.absent(),
                 Value<bool> purchased = const Value.absent(),
                 Value<String?> currentSessionId = const Value.absent(),
@@ -5508,7 +5443,6 @@ class $$UserSettingsTableTableManager
                 id: id,
                 examType: examType,
                 reminderTime: reminderTime,
-                goalDate: goalDate,
                 fontSize: fontSize,
                 purchased: purchased,
                 currentSessionId: currentSessionId,
@@ -5520,7 +5454,6 @@ class $$UserSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> examType = const Value.absent(),
                 Value<String> reminderTime = const Value.absent(),
-                Value<DateTime?> goalDate = const Value.absent(),
                 Value<String> fontSize = const Value.absent(),
                 Value<bool> purchased = const Value.absent(),
                 Value<String?> currentSessionId = const Value.absent(),
@@ -5530,7 +5463,6 @@ class $$UserSettingsTableTableManager
                 id: id,
                 examType: examType,
                 reminderTime: reminderTime,
-                goalDate: goalDate,
                 fontSize: fontSize,
                 purchased: purchased,
                 currentSessionId: currentSessionId,

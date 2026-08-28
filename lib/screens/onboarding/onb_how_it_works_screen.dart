@@ -5,7 +5,7 @@ import '../../widgets/zen_widgets.dart';
 import 'onb_exam_type_screen.dart';
 import 'onb_steps.dart';
 
-/// 1週間の使い方 (ZenOnbHowItWorks) — Step 2/6
+/// 1週間の使い方 (ZenOnbHowItWorks) — Step 2/5
 class OnbHowItWorksScreen extends StatelessWidget {
   const OnbHowItWorksScreen({super.key});
 
@@ -23,7 +23,7 @@ class OnbHowItWorksScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('STEP 2 OF 6', style: ZenText.kicker()),
+                    Text('STEP 2 OF 5', style: ZenText.kicker()),
                     const SizedBox(height: 12),
                     RichText(
                       text: const TextSpan(

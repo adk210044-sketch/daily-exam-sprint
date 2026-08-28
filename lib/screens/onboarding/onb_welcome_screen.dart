@@ -6,7 +6,7 @@ import '../../widgets/zen_widgets.dart';
 import 'onb_how_it_works_screen.dart';
 import 'onb_steps.dart';
 
-/// Welcome (ZenOnbWelcome) — Step 1/6
+/// Welcome (ZenOnbWelcome) — Step 1/5
 class OnbWelcomeScreen extends StatelessWidget {
   const OnbWelcomeScreen({super.key});
 
@@ -32,7 +32,7 @@ class OnbWelcomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Text('STEP 1 OF 6', style: ZenText.kicker()),
+                    Text('STEP 1 OF 5', style: ZenText.kicker()),
                     const SizedBox(height: 12),
                     RichText(
                       text: TextSpan(
