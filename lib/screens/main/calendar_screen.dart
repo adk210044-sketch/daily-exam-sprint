@@ -192,41 +192,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '連続',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: ZenColors.inkSub,
-                      letterSpacing: 1.6,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '$streak',
-                          style: const TextStyle(
-                            fontSize: 56,
-                            fontWeight: FontWeight.w200,
-                            letterSpacing: -1.5,
-                            color: ZenColors.ink,
-                          ),
+              child: Center(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: '連続 ',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ZenColors.inkSub,
                         ),
-                        const TextSpan(
-                          text: '日',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: ZenColors.inkSub,
-                          ),
+                      ),
+                      TextSpan(
+                        text: '$streak',
+                        style: const TextStyle(
+                          fontSize: 56,
+                          fontWeight: FontWeight.w200,
+                          letterSpacing: -1.5,
+                          color: ZenColors.ink,
                         ),
-                      ],
-                    ),
+                      ),
+                      const TextSpan(
+                        text: ' 日',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ZenColors.inkSub,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
             Expanded(
@@ -456,28 +451,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     : ZenColors.ink,
               ),
             ),
-            if (mark != null && tier != '◎')
-              Text.rich(
-                TextSpan(
-                  children: [
-                    if (tier != null)
+            SizedBox(
+              height: 11,
+              child: (mark != null && tier != '◎')
+                  ? Text.rich(
                       TextSpan(
-                        text: '$tier ',
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: _tierColorFor(tier),
-                        ),
+                        children: [
+                          if (tier != null)
+                            TextSpan(
+                              text: '$tier ',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: _tierColorFor(tier),
+                              ),
+                            ),
+                          TextSpan(
+                            text: '${mark.score}%',
+                            style: const TextStyle(
+                              fontSize: 8,
+                              color: ZenColors.inkMute,
+                            ),
+                          ),
+                        ],
                       ),
-                    TextSpan(
-                      text: '${mark.score}%',
-                      style: const TextStyle(
-                        fontSize: 8,
-                        color: ZenColors.inkMute,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : null,
+            ),
           ],
         ),
       ],
@@ -503,7 +502,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        indicator,
+        SizedBox(height: 14, width: 14, child: Center(child: indicator)),
         const SizedBox(width: 5),
         Text(
           label,

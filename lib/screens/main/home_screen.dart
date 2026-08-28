@@ -594,13 +594,13 @@ class _ScoreHistoryRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: 16,
+                      height: 22,
                       child: Center(
                         child: Text(
                           score != null ? '$score%' : '-',
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
                             color: score == null
                                 ? ZenColors.inkMute
                                 : (score == 100
@@ -612,7 +612,7 @@ class _ScoreHistoryRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     SizedBox(
-                      height: 14,
+                      height: 22,
                       child: Center(
                         child: Text(
                           'Day$day',
