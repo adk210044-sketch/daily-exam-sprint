@@ -7,6 +7,13 @@
         android:label="衛生管理者 1日9問"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- AdMob App ID
+             ⚠️ 現在は Google公式テストID。本番リリース前に、
+             AdMobコンソールで取得した実際のApp IDに置き換えてください。
+             https://apps.admob.com/ -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

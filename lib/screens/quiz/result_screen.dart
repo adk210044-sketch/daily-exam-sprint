@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
 import '../../providers/quiz_session_provider.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import 'explanation_screen.dart';
@@ -187,6 +188,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
             ),
+            const AdBannerWidget(),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
               child: Column(

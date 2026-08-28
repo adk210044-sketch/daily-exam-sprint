@@ -6,6 +6,7 @@ import '../../core/theme/zen_tokens.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/app_state.dart';
 import '../../providers/quiz_session_provider.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
@@ -542,6 +543,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            const AdBannerWidget(),
             ZenBottomTab(active: 'home', onTap: _onTabTap),
           ],
         ),

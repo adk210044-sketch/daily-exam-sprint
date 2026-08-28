@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/theme/zen_tokens.dart';
 import 'data/database/app_database.dart';
+import 'data/services/ad_service.dart';
 import 'providers/app_state.dart';
 import 'providers/quiz_session_provider.dart';
 import 'screens/splash_screen.dart';
@@ -12,6 +13,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 日本語日付フォーマット (DateFormat('...', 'ja_JP')) を使うために必須
   await initializeDateFormatting('ja_JP');
+  // 無料版ユーザー向けバナー広告の初期化 (Web platformではno-op)
+  await AdService.instance.init();
   runApp(const ZenHabitApp());
 }
 
