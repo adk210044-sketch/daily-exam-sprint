@@ -19,9 +19,33 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
+/// 正答率から表示シンボルを判定する。
+/// 満点(100%)=◎ / 60%以上=○ / 40%以上=△ / 40%未満=なし
+String? _tierSymbolFor(CalendarMark? mark) {
+  if (mark == null) return null;
+  if (mark.hanamaru || mark.score >= 100) return '◎';
+  if (mark.score >= 60) return '○';
+  if (mark.score >= 40) return '△';
+  return null;
+}
+
+Color _tierColorFor(String symbol) {
+  switch (symbol) {
+    case '◎':
+      return ZenColors.gold;
+    case '○':
+      return ZenColors.accent;
+    case '△':
+      return ZenColors.wrong;
+    default:
+      return ZenColors.inkMute;
+  }
+}
+
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime viewMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
   Map<String, CalendarMark> marksByDate = {};
+  Map<String, ExamSession> sessionsById = {};
   int streak = 0;
   bool loading = true;
 
@@ -37,15 +61,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
       viewMonth.year,
       viewMonth.month,
     );
+    final sessions = await appState.examRepo.getAllSessions();
     final s = await appState.examRepo.getStreakDays();
     if (!mounted) return;
     setState(() {
       marksByDate = {
         for (final m in marks) DateFormat('yyyy-MM-dd').format(m.date): m,
       };
+      sessionsById = {for (final sess in sessions) sess.id: sess};
       streak = s;
       loading = false;
     });
+  }
+
+  /// 週(7日分のセル)の中から取り組んだ試験回のラベル(年度・回)を取得する。
+  /// 複数の回が混在する場合は最初に見つかったものを表示する。
+  String? _weekExamLabel(List<int?> weekDays) {
+    for (final d in weekDays) {
+      if (d == null) continue;
+      final date = DateTime(viewMonth.year, viewMonth.month, d);
+      final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
+      if (mark?.sessionId != null) {
+        final session = sessionsById[mark!.sessionId];
+        if (session != null) return session.year;
+      }
+    }
+    return null;
   }
 
   void _changeMonth(int delta) {
@@ -235,96 +276,65 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 .toList(),
                           ),
                           const SizedBox(height: 6),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 7,
-                                  childAspectRatio: 1,
-                                ),
-                            itemCount: cells.length,
-                            itemBuilder: (context, i) {
-                              final d = cells[i];
-                              if (d == null) return const SizedBox();
-                              final date = DateTime(
-                                viewMonth.year,
-                                viewMonth.month,
-                                d,
+                          Column(
+                            children: List.generate(cells.length ~/ 7, (
+                              weekIdx,
+                            ) {
+                              final weekDays = cells.sublist(
+                                weekIdx * 7,
+                                weekIdx * 7 + 7,
                               );
-                              final isToday =
-                                  date.year == today.year &&
-                                  date.month == today.month &&
-                                  date.day == today.day;
-                              final isFuture = date.isAfter(
-                                DateTime(today.year, today.month, today.day),
-                              );
-                              final mark =
-                                  marksByDate[DateFormat(
-                                    'yyyy-MM-dd',
-                                  ).format(date)];
-                              final isHanamaru = mark?.hanamaru ?? false;
+                              final examLabel = _weekExamLabel(weekDays);
 
-                              return Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  if (isToday)
-                                    Container(
-                                      margin: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: ZenColors.accentSoft,
-                                        border: Border.all(
-                                          color: ZenColors.accent,
-                                          width: 1.5,
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    if (examLabel != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 4,
+                                          bottom: 3,
                                         ),
-                                      ),
-                                    ),
-                                  if (isHanamaru)
-                                    const EnsoCircle(
-                                      size: 36,
-                                      color: ZenColors.gold,
-                                      strokeBase: 2.5,
-                                    ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '$d',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          letterSpacing: -0.3,
-                                          fontWeight: isToday
-                                              ? FontWeight.w700
-                                              : FontWeight.w400,
-                                          color: isFuture
-                                              ? ZenColors.inkMute
-                                              : (isToday
-                                                    ? ZenColors.accentDeep
-                                                    : ZenColors.ink),
-                                        ),
-                                      ),
-                                      if (mark != null && !isHanamaru)
-                                        Text(
-                                          '${mark.score}',
+                                        child: Text(
+                                          examLabel,
                                           style: const TextStyle(
-                                            fontSize: 8,
+                                            fontSize: 9,
                                             color: ZenColors.inkMute,
+                                            letterSpacing: 0.4,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                ],
+                                      ),
+                                    Row(
+                                      children: weekDays.map((d) {
+                                        return Expanded(
+                                          child: AspectRatio(
+                                            aspectRatio: 1,
+                                            child: _buildDayCell(
+                                              context,
+                                              d,
+                                              today,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                ),
                               );
-                            },
+                            }),
                           ),
                         ],
                       ),
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Wrap(
+                spacing: 14,
+                runSpacing: 6,
                 children: [
                   _legend(
                     Container(
@@ -338,29 +348,116 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                     '今日',
                   ),
-                  const SizedBox(width: 16),
                   _legend(
                     const Text(
                       '◎',
                       style: TextStyle(color: ZenColors.gold, fontSize: 14),
                     ),
-                    '満点',
+                    '満点(100%)',
                   ),
-                  const SizedBox(width: 16),
                   _legend(
-                    const Text(
-                      '80%',
-                      style: TextStyle(color: ZenColors.inkMute, fontSize: 11),
+                    Text(
+                      '○',
+                      style: TextStyle(
+                        color: _tierColorFor('○'),
+                        fontSize: 14,
+                      ),
                     ),
-                    '正答率',
+                    '60%以上',
+                  ),
+                  _legend(
+                    Text(
+                      '△',
+                      style: TextStyle(
+                        color: _tierColorFor('△'),
+                        fontSize: 14,
+                      ),
+                    ),
+                    '40%以上',
                   ),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              child: Text(
+                '※ 日付下の数字は正答率(%)を示します',
+                style: TextStyle(fontSize: 10, color: ZenColors.inkMute),
               ),
             ),
             ZenBottomTab(active: 'calendar', onTap: _onTabTap),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDayCell(BuildContext context, int? d, DateTime today) {
+    if (d == null) return const SizedBox();
+    final date = DateTime(viewMonth.year, viewMonth.month, d);
+    final isToday =
+        date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+    final isFuture = date.isAfter(
+      DateTime(today.year, today.month, today.day),
+    );
+    final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
+    final tier = _tierSymbolFor(mark);
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (isToday)
+          Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: ZenColors.accentSoft,
+              border: Border.all(color: ZenColors.accent, width: 1.5),
+            ),
+          ),
+        if (tier == '◎')
+          const EnsoCircle(size: 36, color: ZenColors.gold, strokeBase: 2.5),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$d',
+              style: TextStyle(
+                fontSize: 14,
+                letterSpacing: -0.3,
+                fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
+                color: isFuture
+                    ? ZenColors.inkMute
+                    : (isToday ? ZenColors.accentDeep : ZenColors.ink),
+              ),
+            ),
+            if (mark != null && tier != '◎')
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (tier != null)
+                      TextSpan(
+                        text: '$tier ',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: _tierColorFor(tier),
+                        ),
+                      ),
+                    TextSpan(
+                      text: '${mark.score}%',
+                      style: const TextStyle(
+                        fontSize: 8,
+                        color: ZenColors.inkMute,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 

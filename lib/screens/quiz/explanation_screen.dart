@@ -238,66 +238,96 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               decoration: const BoxDecoration(
                 color: ZenColors.card,
                 border: Border(
                   top: BorderSide(color: ZenColors.line, width: 0.5),
                 ),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: qIdx == 0
-                            ? null
-                            : () => setState(() => qIdx--),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: ZenColors.line),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton(
+                            onPressed: qIdx == 0
+                                ? null
+                                : () => setState(() => qIdx--),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: ZenColors.line),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                            child: const Text(
+                              '← 前の問題',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: ZenColors.ink,
+                              ),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          '← 前の問題',
-                          style: TextStyle(fontSize: 13, color: ZenColors.ink),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (qIdx < questions.length - 1) {
-                            setState(() => qIdx++);
-                          } else {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (qIdx < questions.length - 1) {
+                                setState(() => qIdx++);
+                              } else {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (_) => const HomeScreen(),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ZenColors.accent,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
                               ),
-                              (r) => false,
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ZenColors.accent,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              qIdx < questions.length - 1
+                                  ? '次の問題 →'
+                                  : 'ホームへ',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          qIdx < questions.length - 1 ? '次の問題 →' : 'ホームへ',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        (r) => false,
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        'ホームに戻る',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: ZenColors.inkSub,
+                          decoration: TextDecoration.underline,
+                          decorationColor: ZenColors.inkSub,
                         ),
                       ),
                     ),
