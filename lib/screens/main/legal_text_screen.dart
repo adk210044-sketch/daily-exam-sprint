@@ -1,8 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/zen_tokens.dart';
 
+/// 公開済みの利用規約・プライバシーポリシーページ (Firebase Hosting)
+const String kTermsOfServiceUrl = 'https://hygienecoach-nine.web.app/terms';
+const String kPrivacyPolicyUrl = 'https://hygienecoach-nine.web.app/privacy';
+
+/// 外部ブラウザで利用規約・プライバシーポリシーの公開ページを開く。
+/// 起動できなかった場合はアプリ内の静的テキスト画面 ([LegalTextScreen]) にフォールバックする。
+Future<void> openLegalUrl(
+  BuildContext context, {
+  required String url,
+  required String title,
+  required String fallbackBody,
+}) async {
+  final uri = Uri.parse(url);
+  try {
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (launched) return;
+  } catch (_) {
+    // 起動失敗時はフォールバックへ
+  }
+  if (!context.mounted) return;
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => LegalTextScreen(title: title, body: fallbackBody),
+    ),
+  );
+}
+
 /// 利用規約・プライバシーポリシー等の静的テキスト表示画面 (共通)
+/// ※ 通常はWeb公開版 ([openLegalUrl]) を使用し、本画面はオフライン等での
+/// フォールバック表示用として保持している。
 class LegalTextScreen extends StatelessWidget {
   final String title;
   final String body;

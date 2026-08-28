@@ -67,24 +67,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   void _openTerms(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const LegalTextScreen(
-          title: '利用規約',
-          body: kTermsOfServiceText,
-        ),
-      ),
+    openLegalUrl(
+      context,
+      url: kTermsOfServiceUrl,
+      title: '利用規約',
+      fallbackBody: kTermsOfServiceText,
     );
   }
 
   void _openPrivacy(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const LegalTextScreen(
-          title: 'プライバシーポリシー',
-          body: kPrivacyPolicyText,
-        ),
-      ),
+    openLegalUrl(
+      context,
+      url: kPrivacyPolicyUrl,
+      title: 'プライバシーポリシー',
+      fallbackBody: kPrivacyPolicyText,
     );
   }
 

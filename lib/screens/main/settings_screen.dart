@@ -342,26 +342,22 @@ class SettingsScreen extends StatelessWidget {
                         context,
                         label: '利用規約',
                         value: '',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LegalTextScreen(
-                              title: '利用規約',
-                              body: kTermsOfServiceText,
-                            ),
-                          ),
+                        onTap: () => openLegalUrl(
+                          context,
+                          url: kTermsOfServiceUrl,
+                          title: '利用規約',
+                          fallbackBody: kTermsOfServiceText,
                         ),
                       ),
                       _row(
                         context,
                         label: 'プライバシー',
                         value: '',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LegalTextScreen(
-                              title: 'プライバシーポリシー',
-                              body: kPrivacyPolicyText,
-                            ),
-                          ),
+                        onTap: () => openLegalUrl(
+                          context,
+                          url: kPrivacyPolicyUrl,
+                          title: 'プライバシーポリシー',
+                          fallbackBody: kPrivacyPolicyText,
                         ),
                       ),
                       _row(
