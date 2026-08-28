@@ -582,68 +582,53 @@ class _ScoreHistoryRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 44,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(7, (i) {
-              final day = i + 1;
-              final score = dayScores[day];
-              final h = score != null ? (score / 100) * 40 : 6.0;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (score == 100)
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 2),
-                          child: Text(
-                            '◎',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: ZenColors.gold,
-                            ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(7, (i) {
+            final day = i + 1;
+            final score = dayScores[day];
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      child: Center(
+                        child: Text(
+                          score != null ? '$score%' : '-',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: score == null
+                                ? ZenColors.inkMute
+                                : (score == 100
+                                      ? ZenColors.gold
+                                      : ZenColors.ink),
                           ),
                         ),
-                      Container(
-                        height: h,
-                        decoration: BoxDecoration(
-                          color: score == null
-                              ? Colors.transparent
-                              : (score == 100
-                                    ? ZenColors.gold
-                                    : ZenColors.accent),
-                          borderRadius: BorderRadius.circular(2),
-                          border: score == null
-                              ? Border.all(color: ZenColors.line, width: 1.5)
-                              : null,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 14,
+                      child: Center(
+                        child: Text(
+                          'Day$day',
+                          style: const TextStyle(
+                            fontSize: 9,
+                            color: ZenColors.inkMute,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        score != null ? '$score%' : '-',
-                        style: const TextStyle(
-                          fontSize: 8,
-                          color: ZenColors.inkMute,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Day$day',
-                        style: const TextStyle(
-                          fontSize: 9,
-                          color: ZenColors.inkMute,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
       ],
     );
