@@ -2,21 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../data/services/purchase_service.dart';
 import '../../providers/app_state.dart';
 import '../../widgets/enso_circle.dart';
+import '../main/legal_text_screen.dart';
 import 'purchased_screen.dart';
 
 /// Paywall (ZenPaywall) — ¥780 買い切りの明快な提示。
-class PaywallScreen extends StatelessWidget {
+class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
 
+  @override
+  State<PaywallScreen> createState() => _PaywallScreenState();
+}
+
+class _PaywallScreenState extends State<PaywallScreen> {
+  bool _processing = false;
+  bool _hasNavigated = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 購入が非同期に確定した (ストアからのコールバック) 際に、
+    // AppState.purchased が true になったら自動的に完了画面へ遷移する。
+    final appState = context.watch<AppState>();
+    if (appState.purchased && !_hasNavigated) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PurchasedScreen()),
+        );
+      });
+    }
+    if (appState.purchaseErrorMessage != null) {
+      final message = appState.purchaseErrorMessage!;
+      appState.clearPurchaseError();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _processing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      });
+    }
+  }
+
   Future<void> _purchase(BuildContext context) async {
-    final appState = context.read<AppState>();
-    // 実際のIAP連携はスコープ外。ここでは購入完了として purchased フラグを立てる。
-    await appState.setPurchased(true);
-    if (!context.mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const PurchasedScreen()),
+    if (_processing) return;
+    setState(() => _processing = true);
+    final started = await PurchaseService.instance.buy();
+    // buy() が false を返した場合は onPurchaseError 経由でメッセージが来るため、
+    // ここでは起動できなかった場合のみ念のためローディングを解除する。
+    if (!started && mounted) {
+      setState(() => _processing = false);
+    }
+  }
+
+  Future<void> _restore(BuildContext context) async {
+    if (_processing) return;
+    setState(() => _processing = true);
+    await PurchaseService.instance.restore();
+    if (mounted) setState(() => _processing = false);
+  }
+
+  void _openTerms(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const LegalTextScreen(
+          title: '利用規約',
+          body: kTermsOfServiceText,
+        ),
+      ),
+    );
+  }
+
+  void _openPrivacy(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const LegalTextScreen(
+          title: 'プライバシーポリシー',
+          body: kPrivacyPolicyText,
+        ),
+      ),
     );
   }
 
@@ -204,10 +272,13 @@ class PaywallScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed: () => _purchase(context),
+                      onPressed: _processing ? null : () => _purchase(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ZenColors.accent,
                         foregroundColor: ZenColors.accentInk,
+                        disabledBackgroundColor: ZenColors.accent.withValues(
+                          alpha: 0.6,
+                        ),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
@@ -215,41 +286,94 @@ class PaywallScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'すべての過去問を解放する',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.0,
+                      child: _processing
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                color: ZenColors.accentInk,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'すべての過去問を解放する',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                const SizedBox(
+                                  height: 22,
+                                  child: VerticalDivider(
+                                    color: ZenColors.accentInk,
+                                    thickness: 1,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Text(
+                                  PurchaseService.instance.product?.price ??
+                                      '¥780',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          SizedBox(width: 14),
-                          SizedBox(
-                            height: 22,
-                            child: VerticalDivider(
-                              color: ZenColors.accentInk,
-                              thickness: 1,
-                            ),
-                          ),
-                          SizedBox(width: 14),
-                          Text(
-                            '¥780',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text(
-                    '復元 · 利用規約 · プライバシー',
-                    style: TextStyle(fontSize: 11, color: ZenColors.inkMute),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: _processing ? null : () => _restore(context),
+                        child: const Text(
+                          '復元',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: ZenColors.inkMute,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        '  ·  ',
+                        style: TextStyle(fontSize: 11, color: ZenColors.inkMute),
+                      ),
+                      GestureDetector(
+                        onTap: () => _openTerms(context),
+                        child: const Text(
+                          '利用規約',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: ZenColors.inkMute,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        '  ·  ',
+                        style: TextStyle(fontSize: 11, color: ZenColors.inkMute),
+                      ),
+                      GestureDetector(
+                        onTap: () => _openPrivacy(context),
+                        child: const Text(
+                          'プライバシー',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: ZenColors.inkMute,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

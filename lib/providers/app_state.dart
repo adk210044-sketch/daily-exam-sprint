@@ -7,6 +7,7 @@ import '../data/repositories/review_repository.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/services/exam_session_initializer.dart';
 import '../data/services/notification_service.dart';
+import '../data/services/purchase_service.dart';
 import '../data/services/question_importer.dart';
 
 /// アプリ全体の初期化・設定・現在セッションを保持するグローバル状態
@@ -20,6 +21,9 @@ class AppState extends ChangeNotifier {
   UserSetting? settings;
   List<Reminder> reminders = [];
   bool isReady = false;
+
+  /// 購入フロー中にUIへ伝えるエラーメッセージ (SnackBar等で一度だけ消費する)
+  String? purchaseErrorMessage;
 
   AppState(this.db) {
     settingsRepo = SettingsRepository(db);
@@ -37,7 +41,27 @@ class AppState extends ChangeNotifier {
     if (settings?.notificationsEnabled == true) {
       await _scheduleAllEnabledReminders();
     }
+    _initPurchaseService();
     isReady = true;
+    notifyListeners();
+  }
+
+  /// PurchaseService の購入完了・エラーコールバックを配線し、初期化する。
+  void _initPurchaseService() {
+    PurchaseService.instance.onPurchaseSuccess = () {
+      // ストアからの購入確定 (新規購入 or 復元) を受けてDBに反映
+      setPurchased(true);
+    };
+    PurchaseService.instance.onPurchaseError = (message) {
+      purchaseErrorMessage = message;
+      notifyListeners();
+    };
+    PurchaseService.instance.init();
+  }
+
+  /// UI側で一度表示したエラーメッセージをクリアする。
+  void clearPurchaseError() {
+    purchaseErrorMessage = null;
     notifyListeners();
   }
 
@@ -182,5 +206,11 @@ class AppState extends ChangeNotifier {
       default:
         return 1.0;
     }
+  }
+
+  @override
+  void dispose() {
+    PurchaseService.instance.dispose();
+    super.dispose();
   }
 }
