@@ -85,6 +85,15 @@ class CalendarMarks extends Table {
   ];
 }
 
+/// リマインダー (複数設定可能)
+class Reminders extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get time => text()(); // 'HH:mm'
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+  TextColumn get label => text().nullable()(); // e.g. "朝の復習"
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+}
+
 /// ユーザー設定 (単一行)
 class UserSettings extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();

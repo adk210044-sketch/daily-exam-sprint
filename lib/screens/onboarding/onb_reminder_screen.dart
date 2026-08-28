@@ -320,7 +320,7 @@ class _OnbReminderScreenState extends State<OnbReminderScreen> {
                   ZenPrimaryButton(
                     label: '次へ · $selected に通知',
                     onPressed: () async {
-                      await context.read<AppState>().setReminderTime(selected);
+                      await context.read<AppState>().addReminder(selected);
                       if (context.mounted) {
                         Navigator.of(context).push(
                           MaterialPageRoute(

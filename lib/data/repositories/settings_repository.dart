@@ -35,9 +35,6 @@ class SettingsRepository {
   Future<void> setExamType(String examType) =>
       update(UserSettingsCompanion(examType: Value(examType)));
 
-  Future<void> setReminderTime(String time) =>
-      update(UserSettingsCompanion(reminderTime: Value(time)));
-
   Future<void> setGoalDate(DateTime? date) =>
       update(UserSettingsCompanion(goalDate: Value(date)));
 

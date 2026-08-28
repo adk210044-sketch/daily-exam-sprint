@@ -292,21 +292,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                   children: [
-                                    if (examLabel != null)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 4,
-                                          bottom: 3,
-                                        ),
-                                        child: Text(
-                                          examLabel,
-                                          style: const TextStyle(
-                                            fontSize: 9,
-                                            color: ZenColors.inkMute,
-                                            letterSpacing: 0.4,
-                                          ),
-                                        ),
-                                      ),
                                     Row(
                                       children: weekDays.map((d) {
                                         return Expanded(
@@ -321,6 +306,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         );
                                       }).toList(),
                                     ),
+                                    if (examLabel != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 4,
+                                          bottom: 2,
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              examLabel,
+                                              style: const TextStyle(
+                                                fontSize: 9,
+                                                color: ZenColors.inkMute,
+                                                letterSpacing: 0.4,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Container(
+                                                height: 7,
+                                                color: const Color(
+                                                  0xFFC8C8C0,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                   ],
                                 ),
                               );
@@ -402,6 +417,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final isFuture = date.isAfter(
       DateTime(today.year, today.month, today.day),
     );
+    final isPast =
+        !isToday &&
+        date.isBefore(DateTime(today.year, today.month, today.day));
     final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
     final tier = _tierSymbolFor(mark);
 
@@ -428,9 +446,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 fontSize: 14,
                 letterSpacing: -0.3,
                 fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
-                color: isFuture
+                color: isToday
+                    ? ZenColors.accentDeep
+                    : (isFuture || isPast)
                     ? ZenColors.inkMute
-                    : (isToday ? ZenColors.accentDeep : ZenColors.ink),
+                    : ZenColors.ink,
               ),
             ),
             if (mark != null && tier != '◎')

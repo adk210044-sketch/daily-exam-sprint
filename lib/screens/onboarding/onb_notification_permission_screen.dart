@@ -24,7 +24,11 @@ class OnbNotificationPermissionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dailyN = context.watch<AppState>().dailyQuestionCount;
+    final appState = context.watch<AppState>();
+    final dailyN = appState.dailyQuestionCount;
+    final reminderTime = appState.reminders.isNotEmpty
+        ? appState.reminders.first.time
+        : '8:15';
     return Scaffold(
       backgroundColor: ZenColors.ink.withValues(alpha: 0.4),
       body: SafeArea(
@@ -75,7 +79,7 @@ class OnbNotificationPermissionScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '8:15 に、その日の $dailyN問をお届けします。\n通知を切っても、アプリは使えます。',
+                    '$reminderTime に、その日の $dailyN問をお届けします。\n通知を切っても、アプリは使えます。',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,

@@ -14,7 +14,10 @@ class NotificationService {
 
   bool _initialized = false;
 
-  static const int _dailyReminderId = 1001;
+  // 複数リマインダー用の通知IDベース (Reminder.id を加算して一意なIDを生成)
+  static const int _reminderIdBase = 2000;
+
+  int _notificationIdFor(int reminderId) => _reminderIdBase + reminderId;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -78,16 +81,19 @@ class NotificationService {
     }
   }
 
-  /// "HH:mm" 形式の時刻で毎日リマインダーを再スケジュールする。
+  /// [reminderId] (DB上のReminder.id) に紐づく "HH:mm" 形式の時刻で
+  /// 毎日リマインダーを再スケジュールする。
   /// [dailyCount] は試験区分に応じた1日の問題数 (第1種=9 / 第2種=6)。
-  Future<void> scheduleDailyReminder(
+  Future<void> scheduleReminder(
+    int reminderId,
     String hhmm, {
     int dailyCount = 9,
   }) async {
     if (kIsWeb) return;
     await init();
     try {
-      await _plugin.cancel(id: _dailyReminderId);
+      final notificationId = _notificationIdFor(reminderId);
+      await _plugin.cancel(id: notificationId);
 
       final parts = hhmm.split(':');
       final hour = int.tryParse(parts[0]) ?? 8;
@@ -96,7 +102,7 @@ class NotificationService {
       final scheduled = _nextInstanceOfTime(hour, minute);
 
       await _plugin.zonedSchedule(
-        id: _dailyReminderId,
+        id: notificationId,
         title: '今日の$dailyCount問、はじめましょう',
         body: '1日$dailyCount問 衛生管理者 — 今日の分がまだ残っています。',
         scheduledDate: scheduled,
@@ -115,18 +121,18 @@ class NotificationService {
       );
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('NotificationService scheduleDailyReminder failed: $e');
+        debugPrint('NotificationService scheduleReminder failed: $e');
       }
     }
   }
 
-  Future<void> cancelDailyReminder() async {
+  Future<void> cancelReminder(int reminderId) async {
     if (kIsWeb) return;
     try {
-      await _plugin.cancel(id: _dailyReminderId);
+      await _plugin.cancel(id: _notificationIdFor(reminderId));
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('NotificationService cancelDailyReminder failed: $e');
+        debugPrint('NotificationService cancelReminder failed: $e');
       }
     }
   }
