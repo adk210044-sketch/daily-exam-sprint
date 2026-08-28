@@ -600,7 +600,7 @@ class _ScoreHistoryRow extends StatelessWidget {
                           score != null ? '$score%' : '-',
                           style: TextStyle(
                             fontSize: 17,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w400,
                             color: score == null
                                 ? ZenColors.inkMute
                                 : (score == 100

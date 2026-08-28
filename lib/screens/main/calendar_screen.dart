@@ -362,35 +362,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     '今日',
                   ),
                   _legend(
-                    const Text(
-                      '◎',
-                      style: TextStyle(
-                        color: ZenColors.gold,
-                        fontSize: 14,
-                        height: 1.0,
-                      ),
+                    const Icon(
+                      Icons.adjust,
+                      color: ZenColors.gold,
+                      size: 14,
                     ),
                     '満点(100%)',
                   ),
                   _legend(
-                    Text(
-                      '○',
-                      style: TextStyle(
-                        color: _tierColorFor('○'),
-                        fontSize: 14,
-                        height: 1.0,
-                      ),
+                    Icon(
+                      Icons.circle_outlined,
+                      color: _tierColorFor('○'),
+                      size: 14,
                     ),
                     '60%以上',
                   ),
                   _legend(
-                    Text(
-                      '△',
-                      style: TextStyle(
-                        color: _tierColorFor('△'),
-                        fontSize: 14,
-                        height: 1.0,
-                      ),
+                    Icon(
+                      Icons.change_history,
+                      color: _tierColorFor('△'),
+                      size: 14,
                     ),
                     '40%以上',
                   ),
