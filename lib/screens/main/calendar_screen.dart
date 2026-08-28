@@ -74,19 +74,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  /// 週(7日分のセル)の中から取り組んだ試験回のラベル(年度・回)を取得する。
+  /// 週(7日分のセル)の中から、取り組みを開始した曜日インデックス(0=日〜6=土)と
+  /// 試験回の短縮ラベル(例: "R6.10")を取得する。
   /// 複数の回が混在する場合は最初に見つかったものを表示する。
-  String? _weekExamLabel(List<int?> weekDays) {
-    for (final d in weekDays) {
+  ({String shortLabel, int startIndex})? _weekExamInfo(List<int?> weekDays) {
+    for (var i = 0; i < weekDays.length; i++) {
+      final d = weekDays[i];
       if (d == null) continue;
       final date = DateTime(viewMonth.year, viewMonth.month, d);
       final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
       if (mark?.sessionId != null) {
         final session = sessionsById[mark!.sessionId];
-        if (session != null) return session.year;
+        if (session != null) {
+          return (shortLabel: _shortExamLabel(session.year), startIndex: i);
+        }
       }
     }
     return null;
+  }
+
+  /// "令和6年10月公表" -> "R6.10" のように短縮する。
+  String _shortExamLabel(String year) {
+    final m = RegExp(r'令和(\d+)年(\d+)月').firstMatch(year);
+    if (m == null) return year;
+    return 'R${m.group(1)}.${m.group(2)}';
   }
 
   void _changeMonth(int delta) {
@@ -284,7 +295,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 weekIdx * 7,
                                 weekIdx * 7 + 7,
                               );
-                              final examLabel = _weekExamLabel(weekDays);
+                              final examInfo = _weekExamInfo(weekDays);
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
@@ -306,34 +317,56 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         );
                                       }).toList(),
                                     ),
-                                    if (examLabel != null)
+                                    if (examInfo != null)
                                       Padding(
                                         padding: const EdgeInsets.only(
-                                          top: 4,
+                                          top: 2,
                                           bottom: 2,
                                         ),
                                         child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              examLabel,
-                                              style: const TextStyle(
-                                                fontSize: 9,
-                                                color: ZenColors.inkMute,
-                                                letterSpacing: 0.4,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Expanded(
-                                              child: Container(
-                                                height: 7,
-                                                color: const Color(
-                                                  0xFFC8C8C0,
+                                          children: List.generate(7, (i) {
+                                            final showLine =
+                                                i >= examInfo.startIndex;
+                                            final showLabel =
+                                                i == examInfo.startIndex;
+                                            return Expanded(
+                                              child: SizedBox(
+                                                height: 14,
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    if (showLine)
+                                                      Container(
+                                                        height: 7,
+                                                        color: const Color(
+                                                          0xFFC8C8C0,
+                                                        ),
+                                                      ),
+                                                    if (showLabel)
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 3,
+                                                            ),
+                                                        color: ZenColors.bg,
+                                                        child: Text(
+                                                          examInfo.shortLabel,
+                                                          style: const TextStyle(
+                                                            fontSize: 9,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700,
+                                                            color: ZenColors
+                                                                .inkSub,
+                                                            letterSpacing: 0.2,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            );
+                                          }),
                                         ),
                                       ),
                                   ],
