@@ -57,6 +57,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.15.1
   drift_dev: ^2.31.0
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -71,6 +72,7 @@ flutter:
 
   assets:
     - assets/data/exam_questions.json
+    - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
