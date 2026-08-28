@@ -1,6 +1,6 @@
 // Zen Habit デザイントークン
 // 出典: design_handoff_zen_habit_v2/01_prototype/components/tokens.jsx の TOKENS_A
-// 「1日9問 衛生管理者」— 禅・ミニマル・オフホワイト × 深緑モス
+// 「衛生管理者 1日9問」— 禅・ミニマル・オフホワイト × 深緑モス
 //
 // ⚠️ 厳守: 青系色は使わない。キャラクター/アバターは入れない。
 import 'package:flutter/material.dart';

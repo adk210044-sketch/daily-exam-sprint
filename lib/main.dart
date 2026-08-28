@@ -39,7 +39,7 @@ class ZenHabitApp extends StatelessWidget {
       child: Consumer<AppState>(
         builder: (context, appState, _) {
           return MaterialApp(
-            title: '1日9問 衛生管理者',
+            title: '衛生管理者 1日9問',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               useMaterial3: true,
