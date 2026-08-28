@@ -153,7 +153,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -169,11 +169,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           color: ZenColors.inkMute,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         DateFormat('MMMM').format(viewMonth),
                         style: const TextStyle(
-                          fontSize: 30,
+                          fontSize: 26,
                           fontWeight: FontWeight.w300,
                           color: ZenColors.ink,
                         ),
@@ -191,7 +191,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
               child: Center(
                 child: Text.rich(
                   TextSpan(
@@ -199,14 +199,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       const TextSpan(
                         text: '連続 ',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: ZenColors.inkSub,
                         ),
                       ),
                       TextSpan(
                         text: '$streak',
                         style: const TextStyle(
-                          fontSize: 56,
+                          fontSize: 42,
                           fontWeight: FontWeight.w200,
                           letterSpacing: -1.5,
                           color: ZenColors.ink,
@@ -215,7 +215,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       const TextSpan(
                         text: ' 日',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: ZenColors.inkSub,
                         ),
                       ),
@@ -230,7 +230,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       child: CircularProgressIndicator(color: ZenColors.accent),
                     )
                   : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(20, 32, 20, 20),
+                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
                       child: Column(
                         children: [
                           Row(
@@ -364,7 +364,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   _legend(
                     const Text(
                       '◎',
-                      style: TextStyle(color: ZenColors.gold, fontSize: 14),
+                      style: TextStyle(
+                        color: ZenColors.gold,
+                        fontSize: 14,
+                        height: 1.0,
+                      ),
                     ),
                     '満点(100%)',
                   ),
@@ -374,6 +378,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(
                         color: _tierColorFor('○'),
                         fontSize: 14,
+                        height: 1.0,
                       ),
                     ),
                     '60%以上',
@@ -384,6 +389,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(
                         color: _tierColorFor('△'),
                         fontSize: 14,
+                        height: 1.0,
                       ),
                     ),
                     '40%以上',
@@ -426,7 +432,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       children: [
         if (isToday)
           Container(
-            margin: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: ZenColors.accentSoft,
@@ -437,11 +442,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           const EnsoCircle(size: 36, color: ZenColors.gold, strokeBase: 2.5),
         Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               '$d',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
+                height: 1.0,
                 letterSpacing: -0.3,
                 fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
                 color: isToday
@@ -451,32 +458,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     : ZenColors.ink,
               ),
             ),
-            SizedBox(
-              height: 11,
-              child: (mark != null && tier != '◎')
-                  ? Text.rich(
-                      TextSpan(
-                        children: [
-                          if (tier != null)
-                            TextSpan(
-                              text: '$tier ',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: _tierColorFor(tier),
-                              ),
-                            ),
-                          TextSpan(
-                            text: '${mark.score}%',
-                            style: const TextStyle(
-                              fontSize: 8,
-                              color: ZenColors.inkMute,
-                            ),
+            if (mark != null && tier != '◎')
+              Padding(
+                padding: const EdgeInsets.only(top: 1),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      if (tier != null)
+                        TextSpan(
+                          text: '$tier ',
+                          style: TextStyle(
+                            fontSize: 8,
+                            height: 1.0,
+                            color: _tierColorFor(tier),
                           ),
-                        ],
+                        ),
+                      TextSpan(
+                        text: '${mark.score}%',
+                        style: const TextStyle(
+                          fontSize: 7,
+                          height: 1.0,
+                          color: ZenColors.inkMute,
+                        ),
                       ),
-                    )
-                  : null,
-            ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ],
