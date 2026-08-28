@@ -1,4 +1,4 @@
-package com.dailyexamsprint.flutter_app
+package com.hygienecoach.nine
 
 import io.flutter.embedding.android.FlutterActivity
 
