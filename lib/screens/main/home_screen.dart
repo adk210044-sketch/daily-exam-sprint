@@ -273,6 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: () =>
                                     setState(() => _howOpen = !_howOpen),
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       'WEEK 1  ·  DAY $day / 7',
@@ -298,27 +299,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ],
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  ZenTextLink(
-                                    label: '解く試験を選ぶ',
-                                    color: ZenColors.accent,
-                                    onPressed: () => Navigator.of(
-                                      context,
-                                    ).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const ExamSelectorScreen(),
+                              Flexible(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: ZenTextLink(
+                                        label: '試験を選ぶ',
+                                        color: ZenColors.accent,
+                                        onPressed: () => Navigator.of(
+                                          context,
+                                        ).push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const ExamSelectorScreen(),
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  ZenTextLink(
-                                    label: 'カレンダーを見る',
-                                    color: ZenColors.accent,
-                                    onPressed: () => _onTabTap('calendar'),
-                                  ),
-                                ],
+                                    const SizedBox(width: 10),
+                                    Flexible(
+                                      child: ZenTextLink(
+                                        label: 'カレンダー',
+                                        color: ZenColors.accent,
+                                        onPressed: () =>
+                                            _onTabTap('calendar'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

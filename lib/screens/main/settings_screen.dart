@@ -303,7 +303,7 @@ class SettingsScreen extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.only(top: 4, bottom: 4, left: 4),
                         child: Text(
-                          '本アプリは買い切り課金制です。サブスクリプション(自動更新の定期課金)はありません。',
+                          '本アプリは買い切り課金制です。\nサブスクリプション(自動更新の定期課金)はありません。',
                           style: TextStyle(
                             fontSize: 11,
                             color: ZenColors.inkMute,

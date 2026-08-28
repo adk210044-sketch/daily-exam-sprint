@@ -261,14 +261,24 @@ class ExamSessionRepository {
 
     final today = DateTime.now();
     final dateOnly = DateTime(today.year, today.month, today.day);
+    // CalendarMarks の実質的なユニークキーは `date` (uniqueKeys で定義) だが、
+    // 主キーは自動採番の `id` のため、insertOnConflictUpdate() のデフォルト
+    // (主キーを競合対象にする) では `date` の UNIQUE 制約違反を検知できず、
+    // 同日に2回目以降の完走をすると SqliteException(2067) が発生していた。
+    // → 明示的に `date` を競合対象に指定して upsert する。
+    final markCompanion = CalendarMarksCompanion.insert(
+      date: dateOnly,
+      score: score,
+      hanamaru: hanamaru,
+      sessionId: Value(sessionId),
+    );
     await db
         .into(db.calendarMarks)
-        .insertOnConflictUpdate(
-          CalendarMarksCompanion.insert(
-            date: dateOnly,
-            score: score,
-            hanamaru: hanamaru,
-            sessionId: Value(sessionId),
+        .insert(
+          markCompanion,
+          onConflict: DoUpdate(
+            (_) => markCompanion,
+            target: [db.calendarMarks.date],
           ),
         );
 

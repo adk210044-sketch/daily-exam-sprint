@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -269,17 +270,34 @@ class FeedbackScreen extends StatelessWidget {
                     label: isLast ? '結果を見る' : '次の問題へ',
                     onPressed: () async {
                       if (isLast) {
-                        final result = await quiz.completeSession();
-                        await quiz.maybeAdvanceDay(hanamaru: result.hanamaru);
-                        if (context.mounted) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => ResultScreen(
-                                score: result.score,
-                                hanamaru: result.hanamaru,
-                              ),
-                            ),
+                        try {
+                          final result = await quiz.completeSession();
+                          await quiz.maybeAdvanceDay(
+                            hanamaru: result.hanamaru,
                           );
+                          if (context.mounted) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => ResultScreen(
+                                  score: result.score,
+                                  hanamaru: result.hanamaru,
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (kDebugMode) {
+                            debugPrint('結果を見る処理でエラー: $e');
+                          }
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  '結果の保存に失敗しました。もう一度お試しください。',
+                                ),
+                              ),
+                            );
+                          }
                         }
                       } else {
                         quiz.nextQuestion();

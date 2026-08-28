@@ -67,6 +67,8 @@ class ZenTextLink extends StatelessWidget {
       onTap: onPressed,
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 12,
           color: color,

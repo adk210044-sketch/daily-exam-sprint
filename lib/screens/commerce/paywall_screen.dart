@@ -29,11 +29,11 @@ class PaywallScreen extends StatelessWidget {
       ),
       (
         title: '選べる過去問',
-        sub: '挑戦する回を選べる(未着手・挑戦中・完走が一目)',
+        sub: '未着手・挑戦中・完走が一目でわかる',
       ),
       (
         title: 'おかわり機能',
-        sub: '翌日以降の問題を、その日のうちに前倒しで解ける',
+        sub: '翌日の問題を前倒しで解ける',
       ),
       (
         title: '学習データを引き継ぎ',
@@ -170,6 +170,8 @@ class PaywallScreen extends StatelessWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         f.sub,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: ZenColors.inkSub,
