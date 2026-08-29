@@ -127,10 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // 購入済みユーザー: これまでに到達した Day1-5 の中から選んで解き直す
-    final currentDay = session.day == 0 ? 1 : session.day;
-    final maxSelectableDay = currentDay > 5 ? 5 : currentDay;
-    final availableDays = List.generate(maxSelectableDay, (i) => i + 1);
+    // 購入済みユーザー: この試験回の Day1-5 (過去・未来問わず全て) から選んで解ける
+    final availableDays = List.generate(5, (i) => i + 1);
 
     final selectedDay = await showDialog<int>(
       context: context,
@@ -146,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'これまでのDayから好きな回を選んで、\nもう一度9問に挑戦できます。',
+              'この試験回のDay1〜5から好きな回を選んで、\n(未挑戦の回も含めて)いつでも解けます。',
               style: TextStyle(
                 fontSize: 12,
                 color: ZenColors.inkSub,
@@ -579,8 +577,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   const SizedBox(width: 6),
                                                   Text(
                                                     purchased
-                                                        ? 'おかわり · 好きな回をもう一度解く'
-                                                        : 'おかわり · 好きな回を選んで解き直せます(有料版)',
+                                                        ? 'おかわり · Day1〜5から好きな回を解く'
+                                                        : 'おかわり · Day1〜5から好きな回を選べます(有料版)',
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       fontWeight:
