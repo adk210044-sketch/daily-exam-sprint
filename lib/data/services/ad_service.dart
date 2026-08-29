@@ -11,17 +11,25 @@ class AdUnitIds {
   static const String androidBannerProd =
       'ca-app-pub-1683177610891884/7399837193';
 
+  // iOS バナー広告 本番ユニットID (衛生管理者_1日9問(iOS) / AdMobコンソールで発行)
+  static const String iosBannerProd = 'ca-app-pub-1683177610891884/9289784730';
+
   // Android バナー広告 テストユニットID (Google公式、デバッグ時のみ使用)
   static const String androidBannerTest =
       'ca-app-pub-3940256099942544/6300978111';
 
+  // iOS バナー広告 テストユニットID (Google公式、デバッグ時のみ使用)
+  static const String iosBannerTest = 'ca-app-pub-3940256099942544/2934735716';
+
   static String get banner {
-    // 現状Androidのみサポート。Web/iOS等はAdService側でガードする。
+    // dart:io の Platform は Web ビルドでコンパイルエラーになるため、
+    // Web/Android/iOS を判定できる defaultTargetPlatform (foundation.dart) を使用する。
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
     // デバッグビルドではテストIDを使用し、リリースビルドでのみ本番IDを使用する。
     if (kReleaseMode) {
-      return androidBannerProd;
+      return isIOS ? iosBannerProd : androidBannerProd;
     }
-    return androidBannerTest;
+    return isIOS ? iosBannerTest : androidBannerTest;
   }
 }
 
