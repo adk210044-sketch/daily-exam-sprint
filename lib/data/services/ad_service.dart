@@ -3,18 +3,24 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// AdMob バナー広告の広告ユニットID。
 ///
-/// ⚠️ 現在は Google公式の「テスト広告ユニットID」です。
-/// 本番リリース前に、AdMobコンソール (https://apps.admob.com/) で
-/// 作成した実際の広告ユニットIDに置き換えてください。
-/// テストIDのまま本番公開すると、実際の広告は配信されません
-/// (テスト広告が表示され続けるため収益は発生しません)。
+/// 本番用の広告ユニットID (AdMobコンソールで作成済み) を使用します。
+/// デバッグビルド時は誤クリック・無効ポリシー違反防止のため
+/// Google公式の「テスト広告ユニットID」にフォールバックします。
 class AdUnitIds {
-  // Android バナー広告 テストユニットID (Google公式)
+  // Android バナー広告 本番ユニットID (衛生管理者_1日9問 / AdMobコンソールで発行)
+  static const String androidBannerProd =
+      'ca-app-pub-1683177610891884/7399837193';
+
+  // Android バナー広告 テストユニットID (Google公式、デバッグ時のみ使用)
   static const String androidBannerTest =
       'ca-app-pub-3940256099942544/6300978111';
 
   static String get banner {
     // 現状Androidのみサポート。Web/iOS等はAdService側でガードする。
+    // デバッグビルドではテストIDを使用し、リリースビルドでのみ本番IDを使用する。
+    if (kReleaseMode) {
+      return androidBannerProd;
+    }
     return androidBannerTest;
   }
 }
