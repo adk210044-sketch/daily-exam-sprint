@@ -48,7 +48,7 @@ const List<_ResultMessage> _tierOkay = [
 const List<_ResultMessage> _tierLow = [
   // 40%未満
   _ResultMessage('まずは一歩目。', '解説をじっくり読んで、もう一度挑戦しましょう。'),
-  _ResultMessage('慣れていく途中です。', '初めは誰でもこんなもの。焦らず続けましょう。'),
+  _ResultMessage('慣れていく途中です。', 'まだまだこれから。焦らず続けましょう。'),
   _ResultMessage('大丈夫、ここから。', '解説を読んで、同じ問題に再挑戦してみましょう。'),
   _ResultMessage('今日は種まきの日。', '繰り返すほど、選択肢の言い回しに慣れていきます。'),
 ];
