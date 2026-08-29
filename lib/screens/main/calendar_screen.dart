@@ -440,7 +440,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             // 日付の数字が全セルで同じ縦位置に揃うようにする。
             const SizedBox(height: 1),
             SizedBox(
-              height: 9,
+              height: 11,
               child: (mark != null && tier != '◎')
                   ? Text.rich(
                       TextSpan(
@@ -449,7 +449,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             TextSpan(
                               text: '$tier ',
                               style: TextStyle(
-                                fontSize: 8,
+                                fontSize: 9,
                                 height: 1.0,
                                 color: _tierColorFor(tier),
                               ),
@@ -457,7 +457,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           TextSpan(
                             text: '${mark.score}%',
                             style: const TextStyle(
-                              fontSize: 7,
+                              fontSize: 9,
                               height: 1.0,
                               color: ZenColors.inkMute,
                             ),

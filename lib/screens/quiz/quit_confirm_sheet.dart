@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
-import '../../providers/app_state.dart';
+import '../../providers/quiz_session_provider.dart';
 import '../../widgets/zen_widgets.dart';
 
 /// 中断確認 (ZenQuitConfirm) — ボトムシート形式
 Future<bool?> showQuitConfirmSheet(BuildContext context) {
-  final dailyN = context.read<AppState>().dailyQuestionCount;
+  final quiz = context.read<QuizSessionProvider>();
+  final total = quiz.totalQuestions;
+  final String titleLabel;
+  if (quiz.mode == QuizMode.review) {
+    titleLabel = '苦手 $total問を中断しますか？';
+  } else if (quiz.isReplay) {
+    titleLabel = 'おかわり $total問を中断しますか？';
+  } else {
+    titleLabel = '今日の $total問を中断しますか？';
+  }
   return showModalBottomSheet<bool>(
     context: context,
     backgroundColor: Colors.transparent,
@@ -32,7 +41,7 @@ Future<bool?> showQuitConfirmSheet(BuildContext context) {
               ),
             ),
             Text(
-              '今日の $dailyN問を中断しますか？',
+              titleLabel,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 18,

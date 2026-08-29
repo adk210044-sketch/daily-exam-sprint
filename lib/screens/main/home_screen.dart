@@ -579,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     child: Text(
                                                       purchased
                                                           ? 'おかわり · 好きな回を解く'
-                                                          : 'おかわり · Day1〜5の好きな回(有料版)',
+                                                          : 'おかわり · Day1〜5の好きな回',
                                                       maxLines: 1,
                                                       overflow:
                                                           TextOverflow.ellipsis,
@@ -725,20 +725,35 @@ class _ScoreHistoryRow extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  '${dayAttempts[day]}回',
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    height: 1.0,
-                                    fontWeight: FontWeight.w400,
-                                    color: ZenColors.inkMute,
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${dayAttempts[day]}',
+                                        style: const TextStyle(
+                                          fontSize: 17,
+                                          height: 1.0,
+                                          fontWeight: FontWeight.w400,
+                                          color: ZenColors.inkMute,
+                                        ),
+                                      ),
+                                      const TextSpan(
+                                        text: '回',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          height: 1.0,
+                                          fontWeight: FontWeight.w400,
+                                          color: ZenColors.inkMute,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 const Text(
                                   '挑戦',
                                   style: TextStyle(
-                                    fontSize: 17,
+                                    fontSize: 10,
                                     height: 1.0,
                                     fontWeight: FontWeight.w400,
                                     color: ZenColors.inkMute,
