@@ -152,45 +152,48 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: availableDays.map((d) {
-                final score = _dayScores[d];
-                return GestureDetector(
-                  onTap: () => Navigator.of(context).pop(d),
-                  child: Container(
-                    width: 64,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: ZenColors.accentSoft,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: ZenColors.accent, width: 1),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Day$d',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: ZenColors.accentDeep,
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: availableDays.map((d) {
+                  final score = _dayScores[d];
+                  return GestureDetector(
+                    onTap: () => Navigator.of(context).pop(d),
+                    child: Container(
+                      width: 64,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: ZenColors.accentSoft,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: ZenColors.accent, width: 1),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Day$d',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: ZenColors.accentDeep,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          score != null ? '$score%' : '-',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: ZenColors.inkSub,
+                          const SizedBox(height: 2),
+                          Text(
+                            score != null ? '$score%' : '-',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: ZenColors.inkSub,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ),
