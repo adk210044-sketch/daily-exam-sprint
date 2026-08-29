@@ -111,6 +111,16 @@ class ExamSessionRepository {
     ExamSession session,
   ) async {
     final day = session.day == 0 ? 1 : session.day;
+    return getQuestionsForDay(session, day);
+  }
+
+  /// 指定した Day (1-7) の出題問題を取得する。
+  /// おかわり機能で「現在の進捗Dayとは異なる、過去のDay」を明示的に指定して
+  /// 取得する場合に使用する (Day1-5 は固定9問セット、Day6-7 は復習セット)。
+  Future<List<QuizQuestion>> getQuestionsForDay(
+    ExamSession session,
+    int day,
+  ) async {
     if (day <= 5) {
       final daySets = await ensureDaySets(session);
       return daySets[day - 1];
@@ -340,6 +350,19 @@ class ExamSessionRepository {
       best[p.day] = max(best[p.day] ?? 0, p.score);
     }
     return best;
+  }
+
+  /// 現在のセッションの Day1-7 それぞれの挑戦(完走)回数を取得する。
+  /// (Home画面の週間進捗バー用。dailyProgress の記録件数 = 完走した回数)
+  Future<Map<int, int>> getAttemptCountsByDay(String sessionId) async {
+    final rows = await (db.select(
+      db.dailyProgress,
+    )..where((t) => t.sessionId.equals(sessionId))).get();
+    final counts = <int, int>{};
+    for (final p in rows) {
+      counts[p.day] = (counts[p.day] ?? 0) + 1;
+    }
+    return counts;
   }
 
   /// 直近7日間のスコア履歴 (Home画面のミニバー用)

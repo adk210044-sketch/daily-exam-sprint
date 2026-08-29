@@ -41,9 +41,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() => _processing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       });
     }
   }
@@ -87,22 +87,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     const features = [
-      (
-        title: '全過去問 解放',
-        sub: '令和1年〜令和6年・全11回 · 400問以上',
-      ),
-      (
-        title: '選べる過去問',
-        sub: '未着手・挑戦中・完走が一目でわかる',
-      ),
-      (
-        title: 'おかわり機能',
-        sub: '翌日の問題を前倒しで解ける',
-      ),
-      (
-        title: '学習データを引き継ぎ',
-        sub: '苦手・花丸・連続記録は、購入後もそのまま',
-      ),
+      (title: '全過去問 解放', sub: '令和1年〜令和6年・全11回 · 400問以上'),
+      (title: '選べる過去問', sub: '未着手・挑戦中・完走が一目でわかる'),
+      (title: 'おかわり機能', sub: '翌日の問題を前倒しで解ける'),
+      (title: '学習データを引き継ぎ', sub: '苦手・花丸・連続記録は、購入後もそのまま'),
     ];
 
     return Scaffold(
@@ -291,35 +279,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                 color: ZenColors.accentInk,
                               ),
                             )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'すべての過去問を解放する',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 1.0,
+                          : Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'すべての過去問を解放する',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.0,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 14),
-                                const SizedBox(
-                                  height: 22,
-                                  child: VerticalDivider(
-                                    color: ZenColors.accentInk,
-                                    thickness: 1,
+                                  const SizedBox(width: 14),
+                                  const SizedBox(
+                                    height: 22,
+                                    child: VerticalDivider(
+                                      color: ZenColors.accentInk,
+                                      thickness: 1,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 14),
-                                Text(
-                                  PurchaseService.instance.product?.price ??
-                                      '¥780',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
+                                  const SizedBox(width: 14),
+                                  Text(
+                                    PurchaseService.instance.product?.price ??
+                                        '¥780',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                     ),
                   ),
@@ -341,7 +332,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const Text(
                         '  ·  ',
-                        style: TextStyle(fontSize: 11, color: ZenColors.inkMute),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: ZenColors.inkMute,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => _openTerms(context),
@@ -356,7 +350,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const Text(
                         '  ·  ',
-                        style: TextStyle(fontSize: 11, color: ZenColors.inkMute),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: ZenColors.inkMute,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => _openPrivacy(context),
@@ -468,10 +465,7 @@ class _CompareTable extends StatelessWidget {
                   border: isLast
                       ? null
                       : const Border(
-                          bottom: BorderSide(
-                            color: ZenColors.line,
-                            width: 0.5,
-                          ),
+                          bottom: BorderSide(color: ZenColors.line, width: 0.5),
                         ),
                 ),
                 child: Row(

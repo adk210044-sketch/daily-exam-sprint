@@ -76,7 +76,7 @@ class PurchasedScreen extends StatelessWidget {
                         children: [
                           _statCard(value: '800', unit: '問', label: '解放'),
                           const SizedBox(width: 10),
-                          _statCard(value: '7', unit: '年分', label: '対応'),
+                          _statCard(value: '全', unit: '過去問', label: '解放'),
                           const SizedBox(width: 10),
                           _statCard(value: '∞', unit: '', label: '苦手復習 無料'),
                         ],

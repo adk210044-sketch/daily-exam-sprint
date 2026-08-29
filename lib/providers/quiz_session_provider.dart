@@ -17,6 +17,10 @@ class QuizSessionProvider extends ChangeNotifier {
   String? sessionId; // daily モードのときのみ有効
   int day = 1;
   int attempt = 1;
+
+  /// true の場合、これは「おかわり(過去の回を選んで解き直す)」セッション。
+  /// 現在の進捗Day (session.day) には影響を与えない。
+  bool isReplay = false;
   List<QuizQuestion> questions = [];
   int currentIndex = 0; // 0-based
   final List<int?> chosenAnswers = [];
@@ -33,6 +37,7 @@ class QuizSessionProvider extends ChangeNotifier {
     notifyListeners();
 
     mode = QuizMode.daily;
+    isReplay = false;
     sessionId = examSessionId;
     final session = await examRepo.getSession(examSessionId);
     if (session == null) {
@@ -46,6 +51,36 @@ class QuizSessionProvider extends ChangeNotifier {
     attempt = refreshed?.attempt ?? 1;
 
     questions = await examRepo.getQuestionsForCurrentDay(refreshed ?? session);
+    _resetProgress();
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /// おかわり(過去の回を選んで解き直す)専用セッション開始。
+  /// [replayDay] は 1-5 のいずれか (Day6,7は復習日のため対象外)。
+  /// 進捗 (session.day / attempt カウント) には一切影響を与えない、
+  /// 練習用の読み取り専用プレイセッション。
+  Future<void> startReplay({
+    required String examSessionId,
+    required int replayDay,
+  }) async {
+    isLoading = true;
+    notifyListeners();
+
+    mode = QuizMode.daily;
+    isReplay = true;
+    sessionId = examSessionId;
+    day = replayDay;
+    attempt = 1;
+
+    final session = await examRepo.getSession(examSessionId);
+    if (session == null) {
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+    questions = await examRepo.getQuestionsForDay(session, replayDay);
     _resetProgress();
 
     isLoading = false;
@@ -88,7 +123,7 @@ class QuizSessionProvider extends ChangeNotifier {
     chosenAnswers[currentIndex] = choiceIndex;
     if (correct) correctCount++;
 
-    if (mode == QuizMode.daily && sessionId != null) {
+    if (mode == QuizMode.daily && sessionId != null && !isReplay) {
       await examRepo.recordAnswer(
         sessionId: sessionId!,
         questionId: q.id,
@@ -111,7 +146,7 @@ class QuizSessionProvider extends ChangeNotifier {
 
   /// 完走時に呼ぶ。score(0-100) と 花丸フラグを返す。
   Future<({int score, bool hanamaru})> completeSession() async {
-    if (mode == QuizMode.daily && sessionId != null) {
+    if (mode == QuizMode.daily && sessionId != null && !isReplay) {
       final result = await examRepo.completeDay(
         sessionId: sessionId!,
         day: day,
@@ -131,17 +166,9 @@ class QuizSessionProvider extends ChangeNotifier {
     }
   }
 
-  /// 満点なら次のDayへ進める (daily モードのみ)
+  /// 満点なら次のDayへ進める (daily モードのみ、おかわり再挑戦時は進めない)
   Future<void> maybeAdvanceDay({required bool hanamaru}) async {
-    if (mode == QuizMode.daily && sessionId != null && hanamaru) {
-      await examRepo.advanceToNextDay(sessionId!);
-    }
-  }
-
-  /// おかわり機能 (有料版限定): 満点でなくても次のDayへ前倒しで進める。
-  /// 呼び出し側 (UI) で `appState.purchased == true` を確認してから呼ぶこと。
-  Future<void> advanceDayEarly() async {
-    if (mode == QuizMode.daily && sessionId != null) {
+    if (mode == QuizMode.daily && sessionId != null && hanamaru && !isReplay) {
       await examRepo.advanceToNextDay(sessionId!);
     }
   }

@@ -298,9 +298,7 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                               ),
                             ),
                             child: Text(
-                              qIdx < questions.length - 1
-                                  ? '次の問題 →'
-                                  : 'ホームへ',
+                              qIdx < questions.length - 1 ? '次の問題 →' : 'ホームへ',
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,

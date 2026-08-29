@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +8,7 @@ import '../../providers/app_state.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
+import '../commerce/paywall_screen.dart';
 import '../quiz/question_screen.dart';
 import 'calendar_screen.dart';
 import 'home_screen.dart';
@@ -187,6 +190,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     final categories = byCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
+    final purchased = context.watch<AppState>().purchased;
+    // 実際に出題される問題数 (無料版は dailyN問に制限、有料版は取りこぼし全問)
+    final reviewCount = purchased ? missedCount : min(missedCount, _dailyN);
 
     return Scaffold(
       backgroundColor: ZenColors.bg,
@@ -288,7 +294,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'この中から、あなたに合わせて $_dailyN問を\nランダムに選んで出題します。',
+                                  purchased
+                                      ? 'この中から、取りこぼした全 $missedCount問を\n無制限で出題します。'
+                                      : 'この中から、$_dailyN問をランダムに選んで出題します。\n(無料版は $_dailyN問までの制限があります)',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: ZenColors.inkSub,
@@ -298,9 +306,30 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
                                   height: 52,
-                                  label: '苦手 $_dailyN問をはじめる',
+                                  label: purchased
+                                      ? '苦手 $reviewCount問をはじめる(無制限)'
+                                      : '苦手 $reviewCount問をはじめる',
                                   onPressed: _startReview,
                                 ),
+                                if (!purchased && missedCount > _dailyN) ...[
+                                  const SizedBox(height: 10),
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const PaywallScreen(),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '有料版なら残り${missedCount - _dailyN}問も含めて無制限に復習できます',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: ZenColors.accentDeep,
+                                        decoration: TextDecoration.underline,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ],

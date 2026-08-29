@@ -198,10 +198,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     children: [
                       const TextSpan(
                         text: '連続 ',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: ZenColors.inkSub,
-                        ),
+                        style: TextStyle(fontSize: 16, color: ZenColors.inkSub),
                       ),
                       TextSpan(
                         text: '$streak',
@@ -214,10 +211,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       const TextSpan(
                         text: ' 日',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: ZenColors.inkSub,
-                        ),
+                        style: TextStyle(fontSize: 16, color: ZenColors.inkSub),
                       ),
                     ],
                   ),
@@ -266,8 +260,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: weekDays.map((d) {
@@ -290,9 +283,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                       child: Row(
                                         children: List.generate(7, (i) {
-                                          final showLine = examInfo != null &&
+                                          final showLine =
+                                              examInfo != null &&
                                               i >= examInfo.startIndex;
-                                          final showLabel = examInfo != null &&
+                                          final showLabel =
+                                              examInfo != null &&
                                               i == examInfo.startIndex;
                                           return Expanded(
                                             child: SizedBox(
@@ -319,10 +314,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         style: const TextStyle(
                                                           fontSize: 9,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w700,
-                                                          color: ZenColors
-                                                              .inkSub,
+                                                              FontWeight.w700,
+                                                          color:
+                                                              ZenColors.inkSub,
                                                           letterSpacing: 0.2,
                                                         ),
                                                       ),
@@ -362,11 +356,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     '今日',
                   ),
                   _legend(
-                    const Icon(
-                      Icons.adjust,
-                      color: ZenColors.gold,
-                      size: 14,
-                    ),
+                    const Icon(Icons.adjust, color: ZenColors.gold, size: 14),
                     '満点(100%)',
                   ),
                   _legend(
@@ -409,12 +399,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         date.year == today.year &&
         date.month == today.month &&
         date.day == today.day;
-    final isFuture = date.isAfter(
-      DateTime(today.year, today.month, today.day),
-    );
+    final isFuture = date.isAfter(DateTime(today.year, today.month, today.day));
     final isPast =
-        !isToday &&
-        date.isBefore(DateTime(today.year, today.month, today.day));
+        !isToday && date.isBefore(DateTime(today.year, today.month, today.day));
     final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
     final tier = _tierSymbolFor(mark);
 

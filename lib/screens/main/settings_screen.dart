@@ -522,18 +522,13 @@ class SettingsScreen extends StatelessWidget {
           Switch(
             value: reminder.enabled,
             activeThumbColor: ZenColors.accent,
-            onChanged: (v) =>
-                appState.setReminderEnabled(reminder.id, v),
+            onChanged: (v) => appState.setReminderEnabled(reminder.id, v),
           ),
           GestureDetector(
             onTap: () => appState.removeReminder(reminder.id),
             child: const Padding(
               padding: EdgeInsets.only(left: 4),
-              child: Icon(
-                Icons.close,
-                size: 16,
-                color: ZenColors.inkMute,
-              ),
+              child: Icon(Icons.close, size: 16, color: ZenColors.inkMute),
             ),
           ),
         ],

@@ -272,9 +272,7 @@ class FeedbackScreen extends StatelessWidget {
                       if (isLast) {
                         try {
                           final result = await quiz.completeSession();
-                          await quiz.maybeAdvanceDay(
-                            hanamaru: result.hanamaru,
-                          );
+                          await quiz.maybeAdvanceDay(hanamaru: result.hanamaru);
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
@@ -292,9 +290,7 @@ class FeedbackScreen extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text(
-                                  '結果の保存に失敗しました。もう一度お試しください。',
-                                ),
+                                content: Text('結果の保存に失敗しました。もう一度お試しください。'),
                               ),
                             );
                           }

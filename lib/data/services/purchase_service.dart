@@ -77,9 +77,7 @@ class PurchaseService {
         _product = response.productDetails.first;
       }
       if (response.notFoundIDs.isNotEmpty && kDebugMode) {
-        debugPrint(
-          'IAP product not found on store: ${response.notFoundIDs}',
-        );
+        debugPrint('IAP product not found on store: ${response.notFoundIDs}');
       }
     } catch (e) {
       if (kDebugMode) debugPrint('IAP _loadProduct exception: $e');
@@ -137,9 +135,7 @@ class PurchaseService {
           }
           break;
         case PurchaseStatus.error:
-          onPurchaseError?.call(
-            purchase.error?.message ?? '購入処理でエラーが発生しました。',
-          );
+          onPurchaseError?.call(purchase.error?.message ?? '購入処理でエラーが発生しました。');
           if (purchase.pendingCompletePurchase) {
             _iap.completePurchase(purchase);
           }

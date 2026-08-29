@@ -10,6 +10,7 @@ import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
+import '../commerce/paywall_screen.dart';
 import '../quiz/question_screen.dart';
 import 'calendar_screen.dart';
 import 'review_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   ExamSession? _currentSession;
   Map<int, int> _dayScores = {};
+  Map<int, int> _dayAttempts = {};
   bool _loading = true;
   bool _howOpen = false;
 
@@ -62,11 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final dayScores = session != null
         ? await appState.examRepo.getBestScoresByDay(session.id)
         : <int, int>{};
+    final dayAttempts = session != null
+        ? await appState.examRepo.getAttemptCountsByDay(session.id)
+        : <int, int>{};
 
     if (!mounted) return;
     setState(() {
       _currentSession = session;
       _dayScores = dayScores;
+      _dayAttempts = dayAttempts;
       _loading = false;
     });
   }
@@ -103,59 +109,108 @@ class _HomeScreenState extends State<HomeScreen> {
     _load();
   }
 
-  /// おかわり機能 (有料版限定): 満点でなくても翌日の問題へ前倒しで進む。
+  /// おかわり機能 (有料版限定): Day1-5の中から好きな回を選んで解き直せる。
+  /// (Day6,7は弱点復習専用のため選択肢に出さない)
+  /// 未購入ユーザーがタップした場合は購入誘導 (Paywall) を表示する。
   Future<void> _advanceEarly() async {
     final session = _currentSession;
     if (session == null) return;
     final appState = context.read<AppState>();
-    final quiz = context.read<QuizSessionProvider>();
-    if (!appState.purchased) return;
 
-    final confirmed = await showDialog<bool>(
+    if (!appState.purchased) {
+      // 未購入ユーザー: 購入誘導としてPaywallへ
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
+      if (!mounted) return;
+      await _load();
+      return;
+    }
+
+    // 購入済みユーザー: これまでに到達した Day1-5 の中から選んで解き直す
+    final currentDay = session.day == 0 ? 1 : session.day;
+    final maxSelectableDay = currentDay > 5 ? 5 : currentDay;
+    final availableDays = List.generate(maxSelectableDay, (i) => i + 1);
+
+    final selectedDay = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ZenColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
-          'おかわりしますか?',
+          'おかわり · どの回を解く?',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
-        content: const Text(
-          '満点でなくても、翌日の問題を前倒しで解けます。\n(有料版限定の機能です)',
-          style: TextStyle(fontSize: 13, color: ZenColors.inkSub, height: 1.6),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'これまでのDayから好きな回を選んで、\nもう一度9問に挑戦できます。',
+              style: TextStyle(
+                fontSize: 12,
+                color: ZenColors.inkSub,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: availableDays.map((d) {
+                final score = _dayScores[d];
+                return GestureDetector(
+                  onTap: () => Navigator.of(context).pop(d),
+                  child: Container(
+                    width: 64,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: ZenColors.accentSoft,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: ZenColors.accent, width: 1),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Day$d',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: ZenColors.accentDeep,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          score != null ? '$score%' : '-',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: ZenColors.inkSub,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text(
               'キャンセル',
               style: TextStyle(color: ZenColors.inkMute),
             ),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              'おかわりする',
-              style: TextStyle(
-                color: ZenColors.accent,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (selectedDay == null) return;
+    if (!mounted) return;
 
-    await appState.examRepo.advanceToNextDay(session.id);
-    if (!mounted) return;
-    await _load();
-    if (!mounted) return;
-    final refreshed = _currentSession;
-    if (refreshed == null) return;
-    await quiz.startDaily(refreshed.id);
+    final quiz = context.read<QuizSessionProvider>();
+    await quiz.startReplay(examSessionId: session.id, replayDay: selectedDay);
     if (!mounted) return;
     await Navigator.of(
       context,
@@ -304,8 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: ZenColors.accent,
                                 onPressed: () => Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ExamSelectorScreen(),
+                                    builder: (_) => const ExamSelectorScreen(),
                                   ),
                                 ),
                               ),
@@ -479,46 +533,72 @@ class _HomeScreenState extends State<HomeScreen> {
                                     label: '今日の $dailyN問 をはじめる',
                                     onPressed: _startToday,
                                   ),
-                                  if (context.read<AppState>().purchased &&
-                                      day < 7) ...[
-                                    const SizedBox(height: 10),
-                                    GestureDetector(
-                                      onTap: _advanceEarly,
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: ZenColors.accentSoft,
-                                          borderRadius: BorderRadius.circular(
-                                            ZenColors.radiusBtn,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: const [
-                                            Icon(
-                                              Icons.fast_forward,
-                                              size: 15,
-                                              color: ZenColors.accentDeep,
-                                            ),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              'おかわり · 翌日の問題を前倒しで解く',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                                color: ZenColors.accentDeep,
-                                                letterSpacing: 0.4,
+                                  Builder(
+                                    builder: (context) {
+                                      final purchased = context
+                                          .watch<AppState>()
+                                          .purchased;
+                                      return Column(
+                                        children: [
+                                          const SizedBox(height: 10),
+                                          GestureDetector(
+                                            onTap: _advanceEarly,
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 12,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: purchased
+                                                    ? ZenColors.accentSoft
+                                                    : ZenColors.bgSub,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      ZenColors.radiusBtn,
+                                                    ),
+                                                border: purchased
+                                                    ? null
+                                                    : Border.all(
+                                                        color: ZenColors.line,
+                                                      ),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    purchased
+                                                        ? Icons.replay
+                                                        : Icons.lock_outline,
+                                                    size: 15,
+                                                    color: purchased
+                                                        ? ZenColors.accentDeep
+                                                        : ZenColors.inkMute,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    purchased
+                                                        ? 'おかわり · 好きな回をもう一度解く'
+                                                        : 'おかわり · 好きな回を選んで解き直せます(有料版)',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: purchased
+                                                          ? ZenColors.accentDeep
+                                                          : ZenColors.inkMute,
+                                                      letterSpacing: 0.4,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
                                   const SizedBox(height: 14),
                                   Text(
                                     '前回 · ${session.avgScore ?? '-'} / 100',
@@ -537,7 +617,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Score history
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
-                      child: _ScoreHistoryRow(dayScores: _dayScores),
+                      child: _ScoreHistoryRow(
+                        dayScores: _dayScores,
+                        dayAttempts: _dayAttempts,
+                      ),
                     ),
                   ],
                 ),
@@ -562,8 +645,12 @@ class _HomeScreenState extends State<HomeScreen> {
 /// (アプリはどの曜日からでも開始できるため)。
 class _ScoreHistoryRow extends StatelessWidget {
   final Map<int, int> dayScores;
+  final Map<int, int> dayAttempts;
 
-  const _ScoreHistoryRow({required this.dayScores});
+  const _ScoreHistoryRow({
+    required this.dayScores,
+    this.dayAttempts = const {},
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -620,6 +707,22 @@ class _ScoreHistoryRow extends StatelessWidget {
                           'Day$day',
                           style: const TextStyle(
                             fontSize: 9,
+                            color: ZenColors.inkMute,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    SizedBox(
+                      height: 14,
+                      child: Center(
+                        child: Text(
+                          (dayAttempts[day] ?? 0) > 0
+                              ? '${dayAttempts[day]}回挑戦'
+                              : '',
+                          style: const TextStyle(
+                            fontSize: 8,
                             color: ZenColors.inkMute,
                             fontWeight: FontWeight.w400,
                           ),

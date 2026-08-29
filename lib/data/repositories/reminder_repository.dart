@@ -36,9 +36,9 @@ class ReminderRepository {
   }
 
   Future<void> updateTime(int id, String time) async {
-    await (db.update(
-      db.reminders,
-    )..where((t) => t.id.equals(id))).write(RemindersCompanion(time: Value(time)));
+    await (db.update(db.reminders)..where((t) => t.id.equals(id))).write(
+      RemindersCompanion(time: Value(time)),
+    );
   }
 
   Future<void> setEnabled(int id, bool enabled) async {

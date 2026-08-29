@@ -33,9 +33,8 @@ class _ExamSelectorScreenState extends State<ExamSelectorScreen> {
   Future<void> _load() async {
     final appState = context.read<AppState>();
     final all = await appState.examRepo.getAllSessions();
-    final filtered =
-        all.where((s) => s.examType == appState.examType).toList()
-          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final filtered = all.where((s) => s.examType == appState.examType).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     if (!mounted) return;
     setState(() {
       _sessions = filtered;
@@ -47,9 +46,9 @@ class _ExamSelectorScreenState extends State<ExamSelectorScreen> {
     final appState = context.read<AppState>();
     await appState.setCurrentSession(session.id);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   void _goToPaywall() {
@@ -71,19 +70,13 @@ class _ExamSelectorScreenState extends State<ExamSelectorScreen> {
     }
 
     final doneCount = _sessions
-        .where(
-          (s) => s.status == 'completed' && (purchased || s.isLatest),
-        )
+        .where((s) => s.status == 'completed' && (purchased || s.isLatest))
         .length;
     final doingCount = _sessions
-        .where(
-          (s) => s.status == 'in_progress' && (purchased || s.isLatest),
-        )
+        .where((s) => s.status == 'in_progress' && (purchased || s.isLatest))
         .length;
     final newCount = _sessions
-        .where(
-          (s) => s.status == 'not_started' && (purchased || s.isLatest),
-        )
+        .where((s) => s.status == 'not_started' && (purchased || s.isLatest))
         .length;
     final lockedCount = purchased
         ? 0
@@ -373,7 +366,11 @@ class _ExamSessionCard extends StatelessWidget {
     } else {
       statusWidget = const Text(
         '未着手',
-        style: TextStyle(fontSize: 10, color: ZenColors.inkMute, letterSpacing: 1.0),
+        style: TextStyle(
+          fontSize: 10,
+          color: ZenColors.inkMute,
+          letterSpacing: 1.0,
+        ),
       );
     }
 
