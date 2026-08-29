@@ -575,18 +575,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         : ZenColors.inkMute,
                                                   ),
                                                   const SizedBox(width: 6),
-                                                  Text(
-                                                    purchased
-                                                        ? 'おかわり · Day1〜5から好きな回を解く'
-                                                        : 'おかわり · Day1〜5から好きな回を選べます(有料版)',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: purchased
-                                                          ? ZenColors.accentDeep
-                                                          : ZenColors.inkMute,
-                                                      letterSpacing: 0.4,
+                                                  Flexible(
+                                                    child: Text(
+                                                      purchased
+                                                          ? 'おかわり · 好きな回を解く'
+                                                          : 'おかわり · Day1〜5の好きな回(有料版)',
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: purchased
+                                                            ? ZenColors
+                                                                  .accentDeep
+                                                            : ZenColors.inkMute,
+                                                        letterSpacing: 0.4,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -713,19 +719,34 @@ class _ScoreHistoryRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     SizedBox(
-                      height: 14,
-                      child: Center(
-                        child: Text(
-                          (dayAttempts[day] ?? 0) > 0
-                              ? '${dayAttempts[day]}回挑戦'
-                              : '',
-                          style: const TextStyle(
-                            fontSize: 8,
-                            color: ZenColors.inkMute,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
+                      height: 40,
+                      child: (dayAttempts[day] ?? 0) > 0
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${dayAttempts[day]}回',
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    height: 1.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: ZenColors.inkMute,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  '挑戦',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    height: 1.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: ZenColors.inkMute,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox(),
                     ),
                   ],
                 ),

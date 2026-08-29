@@ -436,33 +436,37 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     : ZenColors.ink,
               ),
             ),
-            if (mark != null && tier != '◎')
-              Padding(
-                padding: const EdgeInsets.only(top: 1),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      if (tier != null)
-                        TextSpan(
-                          text: '$tier ',
-                          style: TextStyle(
-                            fontSize: 8,
-                            height: 1.0,
-                            color: _tierColorFor(tier),
-                          ),
-                        ),
+            // 2行目 (正答率) の有無に関わらず常に同じ高さを確保することで、
+            // 日付の数字が全セルで同じ縦位置に揃うようにする。
+            const SizedBox(height: 1),
+            SizedBox(
+              height: 9,
+              child: (mark != null && tier != '◎')
+                  ? Text.rich(
                       TextSpan(
-                        text: '${mark.score}%',
-                        style: const TextStyle(
-                          fontSize: 7,
-                          height: 1.0,
-                          color: ZenColors.inkMute,
-                        ),
+                        children: [
+                          if (tier != null)
+                            TextSpan(
+                              text: '$tier ',
+                              style: TextStyle(
+                                fontSize: 8,
+                                height: 1.0,
+                                color: _tierColorFor(tier),
+                              ),
+                            ),
+                          TextSpan(
+                            text: '${mark.score}%',
+                            style: const TextStyle(
+                              fontSize: 7,
+                              height: 1.0,
+                              color: ZenColors.inkMute,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    )
+                  : null,
+            ),
           ],
         ),
       ],

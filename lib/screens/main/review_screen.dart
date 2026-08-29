@@ -306,9 +306,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
                                   height: 52,
-                                  label: purchased
-                                      ? '苦手 $reviewCount問をはじめる(無制限)'
-                                      : '苦手 $reviewCount問をはじめる',
+                                  label: '苦手 $reviewCount問をはじめる',
                                   onPressed: _startReview,
                                 ),
                                 if (!purchased && missedCount > _dailyN) ...[
