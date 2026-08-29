@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,61 @@ import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import 'explanation_screen.dart';
 import 'question_screen.dart';
+
+/// 結果メッセージ (タイトル + サブテキスト) のペア。
+class _ResultMessage {
+  final String title;
+  final String sub;
+  const _ResultMessage(this.title, this.sub);
+}
+
+/// スコア帯 (カレンダーの ◎○△ と同じ閾値: 100 / 60 / 40) ごとに
+/// 複数のメッセージパターンを用意し、ランダムに1つを選ぶ。
+/// これにより同じスコア帯でも毎回同じ文言にならず、単調さを防ぐ。
+const List<_ResultMessage> _tierHanamaru = [
+  _ResultMessage('満点。お見事。', '本日のカレンダーに ◎ を刻みました。'),
+  _ResultMessage('文句なしの満点。', '積み重ねが、いま結果になりました。'),
+  _ResultMessage('完璧です。', 'この調子で、次のDayも。'),
+  _ResultMessage('全問正解。', '迷いのない9問でした。'),
+];
+
+const List<_ResultMessage> _tierGood = [
+  // 60%以上100%未満 (カレンダー○相当)
+  _ResultMessage('いい調子です。', 'あと少しで満点。惜しい問題を見直しましょう。'),
+  _ResultMessage('よく解けています。', '間違えた問題だけ、もう一度確認しておきましょう。'),
+  _ResultMessage('順調です。', '着実に力がついています。'),
+  _ResultMessage('good pace です。', '解説を見て、抜け漏れを埋めておきましょう。'),
+];
+
+const List<_ResultMessage> _tierOkay = [
+  // 40%以上60%未満 (カレンダー△相当)
+  _ResultMessage('あと少し。', '同じ問題、もう一度挑戦できます。'),
+  _ResultMessage('伸びしろあり。', '解説を読んでから、もう一度挑んでみましょう。'),
+  _ResultMessage('半分は掴めています。', '間違いは伸びる種。焦らず一つずつ。'),
+  _ResultMessage('ここからが本番。', '苦手を知れたのは、今日の収穫です。'),
+];
+
+const List<_ResultMessage> _tierLow = [
+  // 40%未満
+  _ResultMessage('まずは一歩目。', '解説をじっくり読んで、もう一度挑戦しましょう。'),
+  _ResultMessage('慣れていく途中です。', '初めは誰でもこんなもの。焦らず続けましょう。'),
+  _ResultMessage('大丈夫、ここから。', '解説を読んで、同じ問題に再挑戦してみましょう。'),
+  _ResultMessage('今日は種まきの日。', '繰り返すほど、選択肢の言い回しに慣れていきます。'),
+];
+
+_ResultMessage _pickResultMessage(int score, bool hanamaru) {
+  final List<_ResultMessage> pool;
+  if (hanamaru || score >= 100) {
+    pool = _tierHanamaru;
+  } else if (score >= 60) {
+    pool = _tierGood;
+  } else if (score >= 40) {
+    pool = _tierOkay;
+  } else {
+    pool = _tierLow;
+  }
+  return pool[Random().nextInt(pool.length)];
+}
 
 /// Result (ZenResult) — スコア + 花丸 (円相ceremony)。体験のハイライト。
 class ResultScreen extends StatefulWidget {
@@ -22,9 +79,13 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
+  late final _ResultMessage _message;
+
   @override
   void initState() {
     super.initState();
+    // メッセージは画面表示時に1回だけ抽選し、以後の再ビルドでは固定する。
+    _message = _pickResultMessage(widget.score, widget.hanamaru);
     if (widget.hanamaru) {
       // 満点時: heavy haptic (花丸描画開始と同時)
       HapticFeedback.heavyImpact();
@@ -159,7 +220,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       child: Column(
                         children: [
                           Text(
-                            hanamaru ? '満点。お見事。' : 'あと少し。',
+                            _message.title,
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w500,
@@ -169,9 +230,7 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            hanamaru
-                                ? '本日のカレンダーに ◎ を刻みました。'
-                                : '同じ問題、もう一度挑戦できます。',
+                            _message.sub,
                             style: const TextStyle(
                               fontSize: 12,
                               color: ZenColors.inkSub,
