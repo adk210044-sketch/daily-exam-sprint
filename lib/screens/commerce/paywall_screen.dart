@@ -89,7 +89,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     const features = [
       (title: '全過去問 解放', sub: '令和1年〜令和6年・全11回 · 400問以上'),
       (title: '選べる過去問', sub: '未着手・挑戦中・完走が一目でわかる'),
-      (title: 'おかわり機能', sub: '翌日の問題を前倒しで解ける'),
+      (title: 'おかわり機能', sub: 'Day1〜5から好きな回を選んで解き直せる'),
       (title: '学習データを引き継ぎ', sub: '苦手・花丸・連続記録は、購入後もそのまま'),
     ];
 
@@ -264,6 +264,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           alpha: 0.6,
                         ),
                         elevation: 0,
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.center,
+                        minimumSize: const Size(double.infinity, 58),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             ZenColors.radiusBtn,
@@ -279,38 +282,40 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                 color: ZenColors.accentInk,
                               ),
                             )
-                          : Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    'すべての過去問を解放する',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.0,
-                                    ),
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'すべての過去問を解放する',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 1.0,
                                   ),
-                                  const SizedBox(width: 14),
-                                  const SizedBox(
-                                    height: 22,
-                                    child: VerticalDivider(
-                                      color: ZenColors.accentInk,
-                                      thickness: 1,
-                                    ),
+                                ),
+                                const SizedBox(width: 14),
+                                const SizedBox(
+                                  height: 22,
+                                  child: VerticalDivider(
+                                    color: ZenColors.accentInk,
+                                    thickness: 1,
+                                    width: 1,
                                   ),
-                                  const SizedBox(width: 14),
-                                  Text(
-                                    PurchaseService.instance.product?.price ??
-                                        '¥780',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                ),
+                                const SizedBox(width: 14),
+                                Text(
+                                  PurchaseService.instance.product?.price ??
+                                      '¥780',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                     ),
                   ),
