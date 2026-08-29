@@ -116,6 +116,12 @@ class QuizSessionProvider extends ChangeNotifier {
     correctCount = 0;
   }
 
+  /// 苦手復習セッションの回答ログに使う sessionId のプレースホルダー。
+  /// 苦手復習は特定の試験回に紐付かないため固定値を使う。
+  /// (ExamSessionRepository.getQuestionsForCurrentDay 等の day=1〜5 フィルタには
+  /// 影響しない — sessionId が一致しない限りそのクエリ結果には含まれないため)
+  static const String reviewSessionId = 'review';
+
   /// 選択肢を選んだ時に呼ぶ。正誤判定・ログ記録・進捗更新を行う。
   Future<bool> answer(int choiceIndex) async {
     final q = currentQuestion;
@@ -124,11 +130,23 @@ class QuizSessionProvider extends ChangeNotifier {
     if (correct) correctCount++;
 
     if (mode == QuizMode.daily && sessionId != null && !isReplay) {
+      // 通常の「今日のN問」学習: 進捗に反映される正式なログ。
       await examRepo.recordAnswer(
         sessionId: sessionId!,
         questionId: q.id,
         day: day,
         attempt: attempt,
+        chosen: choiceIndex,
+        correct: correct,
+      );
+    } else if (mode == QuizMode.review) {
+      // 苦手復習: 進捗には影響しないが、苦手判定 (連続正解による卒業) の
+      // ためにログは記録する。
+      await examRepo.recordAnswer(
+        sessionId: reviewSessionId,
+        questionId: q.id,
+        day: 0,
+        attempt: 0,
         chosen: choiceIndex,
         correct: correct,
       );
