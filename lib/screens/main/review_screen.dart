@@ -111,9 +111,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      '苦手だけを、$_dailyN問',
-                      style: const TextStyle(
+                    const Text(
+                      '苦手を、乗り越える',
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w400,
                         color: ZenColors.ink,
@@ -218,9 +218,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text(
-                            '苦手だけを、$_dailyN問',
-                            style: const TextStyle(
+                          const Text(
+                            '苦手を、乗り越える',
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w400,
                               color: ZenColors.ink,

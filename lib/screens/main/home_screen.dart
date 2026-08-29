@@ -283,9 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 '今日も、$dailyN問だけ。',
                                 style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.4,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w400,
                                   color: ZenColors.ink,
                                 ),
                               ),
