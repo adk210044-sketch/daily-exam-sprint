@@ -295,8 +295,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   purchased
-                                      ? 'この中から、取りこぼした全 $missedCount問を\n無制限で出題します。2回連続で正解すると苦手から卒業します。'
-                                      : 'この中から、$_dailyN問をランダムに選んで出題します。\n(無料版は $_dailyN問までの制限があります)\n2回連続で正解すると苦手から卒業します。',
+                                      ? '「今日の$_dailyN問」で一回でも不正解となった\n全 $missedCount問を無制限で出題します。\n2回連続で正解すると苦手から卒業します。'
+                                      : '「今日の$_dailyN問」で一回でも不正解となった\n問題から $_dailyN問をランダムに出題します。\n(無料版は $_dailyN問までの制限があります)\n2回連続で正解すると苦手から卒業します。',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: ZenColors.inkSub,

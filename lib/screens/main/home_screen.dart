@@ -769,6 +769,11 @@ class _ScoreHistoryRow extends StatelessWidget {
             );
           }),
         ),
+        const SizedBox(height: 6),
+        const Text(
+          '※「おかわり」結果は除く',
+          style: TextStyle(fontSize: 9, color: ZenColors.inkMute),
+        ),
       ],
     );
   }
