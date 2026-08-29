@@ -103,7 +103,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'REVIEW  ·  FOREVER FREE',
+                      'OVERCOME A WEAKNESS',
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 3.2,
@@ -210,7 +210,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'REVIEW  ·  FOREVER FREE',
+                            'OVERCOME A WEAKNESS',
                             style: TextStyle(
                               fontSize: 10,
                               letterSpacing: 3.2,
