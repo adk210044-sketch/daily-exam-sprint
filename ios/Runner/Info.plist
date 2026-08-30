@@ -47,8 +47,6 @@
 	<true/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1683177610891884~5294699403</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>この識別子は、あなたに合わせた広告を表示するために使用されます。</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
