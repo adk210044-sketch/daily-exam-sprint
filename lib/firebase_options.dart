@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -64,5 +61,14 @@ class DefaultFirebaseOptions {
     messagingSenderId: '42894654335',
     projectId: 'hygienecoach-nine',
     storageBucket: 'hygienecoach-nine.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDLQzHJ1dd0CWGAcEzOwGalH4VjE2vm_zk',
+    appId: '1:42894654335:ios:421ff5634ca86ee3cc384a',
+    messagingSenderId: '42894654335',
+    projectId: 'hygienecoach-nine',
+    storageBucket: 'hygienecoach-nine.firebasestorage.app',
+    iosBundleId: 'com.dailyexamsprint.exam',
   );
 }
