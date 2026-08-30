@@ -106,6 +106,11 @@ class UserSettings extends Table {
       boolean().withDefault(const Constant(false))();
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(false))();
+  // exam_questions.json の内容(解説文の修正など)が更新された際に、
+  // QuestionImporter が再インポートを行うべきかどうかを判定するためのバージョン番号。
+  // QuestionImporter.currentContentVersion と比較し、古い場合は Questions テーブルのみ
+  // insertOrReplace で更新する (ユーザーの進捗データには影響しない)。
+  IntColumn get contentVersion => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

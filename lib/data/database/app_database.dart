@@ -22,7 +22,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -36,6 +36,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         // 目標日設定機能を廃止 (シンプル化のため削除)
         await m.dropColumn(userSettings, 'goal_date');
+      }
+      if (from < 4) {
+        // 問題データ(exam_questions.json)のコンテンツバージョン管理用カラム。
+        // 既存インストールでは 0 から開始し、QuestionImporter が
+        // currentContentVersion との比較で再インポートの必要性を判定する。
+        await m.addColumn(userSettings, userSettings.contentVersion);
       }
     },
   );

@@ -3027,6 +3027,18 @@ class $UserSettingsTable extends UserSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _contentVersionMeta = const VerificationMeta(
+    'contentVersion',
+  );
+  @override
+  late final GeneratedColumn<int> contentVersion = GeneratedColumn<int>(
+    'content_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3037,6 +3049,7 @@ class $UserSettingsTable extends UserSettings
     currentSessionId,
     onboardingComplete,
     notificationsEnabled,
+    contentVersion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3107,6 +3120,15 @@ class $UserSettingsTable extends UserSettings
         ),
       );
     }
+    if (data.containsKey('content_version')) {
+      context.handle(
+        _contentVersionMeta,
+        contentVersion.isAcceptableOrUnknown(
+          data['content_version']!,
+          _contentVersionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3148,6 +3170,10 @@ class $UserSettingsTable extends UserSettings
         DriftSqlType.bool,
         data['${effectivePrefix}notifications_enabled'],
       )!,
+      contentVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}content_version'],
+      )!,
     );
   }
 
@@ -3166,6 +3192,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
   final String? currentSessionId;
   final bool onboardingComplete;
   final bool notificationsEnabled;
+  final int contentVersion;
   const UserSetting({
     required this.id,
     required this.examType,
@@ -3175,6 +3202,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     this.currentSessionId,
     required this.onboardingComplete,
     required this.notificationsEnabled,
+    required this.contentVersion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3189,6 +3217,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     }
     map['onboarding_complete'] = Variable<bool>(onboardingComplete);
     map['notifications_enabled'] = Variable<bool>(notificationsEnabled);
+    map['content_version'] = Variable<int>(contentVersion);
     return map;
   }
 
@@ -3204,6 +3233,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           : Value(currentSessionId),
       onboardingComplete: Value(onboardingComplete),
       notificationsEnabled: Value(notificationsEnabled),
+      contentVersion: Value(contentVersion),
     );
   }
 
@@ -3223,6 +3253,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       notificationsEnabled: serializer.fromJson<bool>(
         json['notificationsEnabled'],
       ),
+      contentVersion: serializer.fromJson<int>(json['contentVersion']),
     );
   }
   @override
@@ -3237,6 +3268,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       'currentSessionId': serializer.toJson<String?>(currentSessionId),
       'onboardingComplete': serializer.toJson<bool>(onboardingComplete),
       'notificationsEnabled': serializer.toJson<bool>(notificationsEnabled),
+      'contentVersion': serializer.toJson<int>(contentVersion),
     };
   }
 
@@ -3249,6 +3281,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     Value<String?> currentSessionId = const Value.absent(),
     bool? onboardingComplete,
     bool? notificationsEnabled,
+    int? contentVersion,
   }) => UserSetting(
     id: id ?? this.id,
     examType: examType ?? this.examType,
@@ -3260,6 +3293,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
         : this.currentSessionId,
     onboardingComplete: onboardingComplete ?? this.onboardingComplete,
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    contentVersion: contentVersion ?? this.contentVersion,
   );
   UserSetting copyWithCompanion(UserSettingsCompanion data) {
     return UserSetting(
@@ -3279,6 +3313,9 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       notificationsEnabled: data.notificationsEnabled.present
           ? data.notificationsEnabled.value
           : this.notificationsEnabled,
+      contentVersion: data.contentVersion.present
+          ? data.contentVersion.value
+          : this.contentVersion,
     );
   }
 
@@ -3292,7 +3329,8 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           ..write('purchased: $purchased, ')
           ..write('currentSessionId: $currentSessionId, ')
           ..write('onboardingComplete: $onboardingComplete, ')
-          ..write('notificationsEnabled: $notificationsEnabled')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('contentVersion: $contentVersion')
           ..write(')'))
         .toString();
   }
@@ -3307,6 +3345,7 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     currentSessionId,
     onboardingComplete,
     notificationsEnabled,
+    contentVersion,
   );
   @override
   bool operator ==(Object other) =>
@@ -3319,7 +3358,8 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           other.purchased == this.purchased &&
           other.currentSessionId == this.currentSessionId &&
           other.onboardingComplete == this.onboardingComplete &&
-          other.notificationsEnabled == this.notificationsEnabled);
+          other.notificationsEnabled == this.notificationsEnabled &&
+          other.contentVersion == this.contentVersion);
 }
 
 class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
@@ -3331,6 +3371,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
   final Value<String?> currentSessionId;
   final Value<bool> onboardingComplete;
   final Value<bool> notificationsEnabled;
+  final Value<int> contentVersion;
   const UserSettingsCompanion({
     this.id = const Value.absent(),
     this.examType = const Value.absent(),
@@ -3340,6 +3381,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     this.currentSessionId = const Value.absent(),
     this.onboardingComplete = const Value.absent(),
     this.notificationsEnabled = const Value.absent(),
+    this.contentVersion = const Value.absent(),
   });
   UserSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -3350,6 +3392,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     this.currentSessionId = const Value.absent(),
     this.onboardingComplete = const Value.absent(),
     this.notificationsEnabled = const Value.absent(),
+    this.contentVersion = const Value.absent(),
   });
   static Insertable<UserSetting> custom({
     Expression<int>? id,
@@ -3360,6 +3403,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     Expression<String>? currentSessionId,
     Expression<bool>? onboardingComplete,
     Expression<bool>? notificationsEnabled,
+    Expression<int>? contentVersion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3371,6 +3415,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
       if (onboardingComplete != null) 'onboarding_complete': onboardingComplete,
       if (notificationsEnabled != null)
         'notifications_enabled': notificationsEnabled,
+      if (contentVersion != null) 'content_version': contentVersion,
     });
   }
 
@@ -3383,6 +3428,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     Value<String?>? currentSessionId,
     Value<bool>? onboardingComplete,
     Value<bool>? notificationsEnabled,
+    Value<int>? contentVersion,
   }) {
     return UserSettingsCompanion(
       id: id ?? this.id,
@@ -3393,6 +3439,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
       currentSessionId: currentSessionId ?? this.currentSessionId,
       onboardingComplete: onboardingComplete ?? this.onboardingComplete,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      contentVersion: contentVersion ?? this.contentVersion,
     );
   }
 
@@ -3423,6 +3470,9 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     if (notificationsEnabled.present) {
       map['notifications_enabled'] = Variable<bool>(notificationsEnabled.value);
     }
+    if (contentVersion.present) {
+      map['content_version'] = Variable<int>(contentVersion.value);
+    }
     return map;
   }
 
@@ -3436,7 +3486,8 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
           ..write('purchased: $purchased, ')
           ..write('currentSessionId: $currentSessionId, ')
           ..write('onboardingComplete: $onboardingComplete, ')
-          ..write('notificationsEnabled: $notificationsEnabled')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('contentVersion: $contentVersion')
           ..write(')'))
         .toString();
   }
@@ -5245,6 +5296,7 @@ typedef $$UserSettingsTableCreateCompanionBuilder =
       Value<String?> currentSessionId,
       Value<bool> onboardingComplete,
       Value<bool> notificationsEnabled,
+      Value<int> contentVersion,
     });
 typedef $$UserSettingsTableUpdateCompanionBuilder =
     UserSettingsCompanion Function({
@@ -5256,6 +5308,7 @@ typedef $$UserSettingsTableUpdateCompanionBuilder =
       Value<String?> currentSessionId,
       Value<bool> onboardingComplete,
       Value<bool> notificationsEnabled,
+      Value<int> contentVersion,
     });
 
 class $$UserSettingsTableFilterComposer
@@ -5304,6 +5357,11 @@ class $$UserSettingsTableFilterComposer
 
   ColumnFilters<bool> get notificationsEnabled => $composableBuilder(
     column: $table.notificationsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get contentVersion => $composableBuilder(
+    column: $table.contentVersion,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5356,6 +5414,11 @@ class $$UserSettingsTableOrderingComposer
     column: $table.notificationsEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get contentVersion => $composableBuilder(
+    column: $table.contentVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserSettingsTableAnnotationComposer
@@ -5396,6 +5459,11 @@ class $$UserSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get notificationsEnabled => $composableBuilder(
     column: $table.notificationsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get contentVersion => $composableBuilder(
+    column: $table.contentVersion,
     builder: (column) => column,
   );
 }
@@ -5439,6 +5507,7 @@ class $$UserSettingsTableTableManager
                 Value<String?> currentSessionId = const Value.absent(),
                 Value<bool> onboardingComplete = const Value.absent(),
                 Value<bool> notificationsEnabled = const Value.absent(),
+                Value<int> contentVersion = const Value.absent(),
               }) => UserSettingsCompanion(
                 id: id,
                 examType: examType,
@@ -5448,6 +5517,7 @@ class $$UserSettingsTableTableManager
                 currentSessionId: currentSessionId,
                 onboardingComplete: onboardingComplete,
                 notificationsEnabled: notificationsEnabled,
+                contentVersion: contentVersion,
               ),
           createCompanionCallback:
               ({
@@ -5459,6 +5529,7 @@ class $$UserSettingsTableTableManager
                 Value<String?> currentSessionId = const Value.absent(),
                 Value<bool> onboardingComplete = const Value.absent(),
                 Value<bool> notificationsEnabled = const Value.absent(),
+                Value<int> contentVersion = const Value.absent(),
               }) => UserSettingsCompanion.insert(
                 id: id,
                 examType: examType,
@@ -5468,6 +5539,7 @@ class $$UserSettingsTableTableManager
                 currentSessionId: currentSessionId,
                 onboardingComplete: onboardingComplete,
                 notificationsEnabled: notificationsEnabled,
+                contentVersion: contentVersion,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
