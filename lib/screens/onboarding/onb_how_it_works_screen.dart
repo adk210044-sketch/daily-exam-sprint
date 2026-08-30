@@ -47,7 +47,7 @@ class OnbHowItWorksScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Day 1-5 は新しい問題。\nDay 6-7 は、あなたが間違えた問題だけを復習。',
+                      '毎日違う9問。5日(Day1-5)で試験1回分を一周し、\n残り2日(Day6-7)でミスの多かった問題だけを復習。',
                       style: TextStyle(
                         fontSize: 13,
                         color: ZenColors.inkSub,
@@ -113,7 +113,7 @@ class OnbHowItWorksScreen extends StatelessWidget {
                       badgeColor: ZenColors.accentSoft,
                       badgeTextColor: ZenColors.accentDeep,
                       title: '5日で、試験1回分を解く',
-                      desc: '各分野からバランスよく 9問 / 日。\n満点まで、その日中は何度でも挑戦可。',
+                      desc: '各分野からバランスよく 9問 / 日。\n同じ日の中では、何度でも同じ9問に再挑戦可。',
                       border: ZenColors.line,
                     ),
                     const SizedBox(height: 10),

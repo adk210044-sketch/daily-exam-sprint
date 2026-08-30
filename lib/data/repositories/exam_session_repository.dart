@@ -201,10 +201,68 @@ class ExamSessionRepository {
     return selectedIds.map((id) => byId[id]).whereType<QuizQuestion>().toList();
   }
 
+  /// 暦日ベースで day (1-7) を進行させる。
+  ///
+  /// 仕様: 「1日の中では同じ9問を繰り返し、日付が変わると次のDayの
+  /// 新しい9問に切り替わる」ため、満点かどうかに関わらず、日付が
+  /// 変わった時点で自動的に day を進める。
+  ///
+  /// - 初回アクセス時 ([dayStartedAt] が null): 現在の day (0なら1) が
+  ///   「今日から開始した」ものとして [dayStartedAt] を今日の日付に設定する。
+  ///   (既存ユーザーのマイグレーション直後もこの分岐に入り、進行中の day は
+  ///   保持したまま、以後の日付比較の起点として今日を記録するだけに留める)
+  /// - 2回目以降: 前回の [dayStartedAt] から経過した日数ぶん day を進め、
+  ///   [dayStartedAt] を今日に更新する。複数日分アクセスが空いた場合は
+  ///   その日数ぶんまとめて進む (最大7でクランプ)。
+  /// - 既に完走済み ([status] == 'completed') のセッションは変更しない。
+  ///
+  /// 戻り値: 更新後の [ExamSession] (変更がなければ渡された session をそのまま返す)。
+  Future<ExamSession> ensureDayProgress(ExamSession session) async {
+    if (session.status == 'completed') return session;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (session.dayStartedAt == null) {
+      final startDay = session.day == 0 ? 1 : session.day;
+      await (db.update(
+        db.examSessions,
+      )..where((t) => t.id.equals(session.id))).write(
+        ExamSessionsCompanion(
+          day: Value(startDay),
+          dayStartedAt: Value(today),
+        ),
+      );
+      return (await getSession(session.id)) ?? session;
+    }
+
+    final startedDate = DateTime(
+      session.dayStartedAt!.year,
+      session.dayStartedAt!.month,
+      session.dayStartedAt!.day,
+    );
+    final daysPassed = today.difference(startedDate).inDays;
+    if (daysPassed <= 0) return session; // 同じ日にはまだ進めない
+
+    final newDay = min(session.day + daysPassed, 7);
+    await (db.update(
+      db.examSessions,
+    )..where((t) => t.id.equals(session.id))).write(
+      ExamSessionsCompanion(
+        day: Value(newDay),
+        dayStartedAt: Value(today),
+        attempt: const Value(0), // 新しいDayになったので挑戦回数をリセット
+      ),
+    );
+    return (await getSession(session.id)) ?? session;
+  }
+
   /// 挑戦開始時: attempt をインクリメント、status を in_progress に。
   Future<void> startAttempt(String sessionId) async {
-    final session = await getSession(sessionId);
-    if (session == null) return;
+    final session0 = await getSession(sessionId);
+    if (session0 == null) return;
+    // 日付が変わっていれば先に day を進めてから attempt を積む。
+    final session = await ensureDayProgress(session0);
     await (db.update(
       db.examSessions,
     )..where((t) => t.id.equals(sessionId))).write(
@@ -325,18 +383,6 @@ class ExamSessionRepository {
     }
 
     return (score: score, hanamaru: hanamaru);
-  }
-
-  /// 次のDayへ進む (満点 or 十分な進捗後にユーザーが選択)
-  Future<void> advanceToNextDay(String sessionId) async {
-    final session = await getSession(sessionId);
-    if (session == null) return;
-    final nextDay = min(session.day + 1, 7);
-    await (db.update(
-      db.examSessions,
-    )..where((t) => t.id.equals(sessionId))).write(
-      ExamSessionsCompanion(day: Value(nextDay), attempt: const Value(0)),
-    );
   }
 
   /// 現在のセッションの Day1-7 それぞれの最高スコア (%) を取得する。

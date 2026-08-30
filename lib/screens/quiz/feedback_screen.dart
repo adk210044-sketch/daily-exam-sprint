@@ -301,7 +301,6 @@ class FeedbackScreen extends StatelessWidget {
                       if (isLast) {
                         try {
                           final result = await quiz.completeSession();
-                          await quiz.maybeAdvanceDay(hanamaru: result.hanamaru);
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(

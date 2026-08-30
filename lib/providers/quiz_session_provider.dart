@@ -39,12 +39,15 @@ class QuizSessionProvider extends ChangeNotifier {
     mode = QuizMode.daily;
     isReplay = false;
     sessionId = examSessionId;
-    final session = await examRepo.getSession(examSessionId);
-    if (session == null) {
+    final session0 = await examRepo.getSession(examSessionId);
+    if (session0 == null) {
       isLoading = false;
       notifyListeners();
       return;
     }
+    // 日付が変わっていれば、ここで day を暦日ベースに進める
+    // (満点かどうかに関わらず、1日経てば次のDayの新しい9問に切り替わる)。
+    final session = await examRepo.ensureDayProgress(session0);
     day = session.day == 0 ? 1 : session.day;
     await examRepo.startAttempt(examSessionId);
     final refreshed = await examRepo.getSession(examSessionId);
@@ -184,10 +187,4 @@ class QuizSessionProvider extends ChangeNotifier {
     }
   }
 
-  /// 満点なら次のDayへ進める (daily モードのみ、おかわり再挑戦時は進めない)
-  Future<void> maybeAdvanceDay({required bool hanamaru}) async {
-    if (mode == QuizMode.daily && sessionId != null && hanamaru && !isReplay) {
-      await examRepo.advanceToNextDay(sessionId!);
-    }
-  }
 }

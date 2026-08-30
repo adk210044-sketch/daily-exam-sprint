@@ -42,6 +42,10 @@ class ExamSessions extends Table {
       .nullable()(); // Day1-5 の問題ID割り当て(JSON: Map<int(day), List<String>>)
   TextColumn get reviewQuestionIdsJson =>
       text().nullable()(); // Day6-7 復習9問のID(JSON List<String>)
+  // 現在の day が開始された日 (00:00に正規化)。
+  // この日付と「今日」を比較し、日付が変わっていれば自動的に day を+1進める
+  // (満点かどうかに関わらず、暦日ベースで Day1-7 を進行させるため)。
+  DateTimeColumn get dayStartedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

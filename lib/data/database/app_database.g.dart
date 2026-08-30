@@ -860,6 +860,17 @@ class $ExamSessionsTable extends ExamSessions
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _dayStartedAtMeta = const VerificationMeta(
+    'dayStartedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dayStartedAt = GeneratedColumn<DateTime>(
+    'day_started_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -877,6 +888,7 @@ class $ExamSessionsTable extends ExamSessions
     weekComplete,
     dayQuestionIdsJson,
     reviewQuestionIdsJson,
+    dayStartedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -999,6 +1011,15 @@ class $ExamSessionsTable extends ExamSessions
         ),
       );
     }
+    if (data.containsKey('day_started_at')) {
+      context.handle(
+        _dayStartedAtMeta,
+        dayStartedAt.isAcceptableOrUnknown(
+          data['day_started_at']!,
+          _dayStartedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1068,6 +1089,10 @@ class $ExamSessionsTable extends ExamSessions
         DriftSqlType.string,
         data['${effectivePrefix}review_question_ids_json'],
       ),
+      dayStartedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}day_started_at'],
+      ),
     );
   }
 
@@ -1093,6 +1118,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
   final bool weekComplete;
   final String? dayQuestionIdsJson;
   final String? reviewQuestionIdsJson;
+  final DateTime? dayStartedAt;
   const ExamSession({
     required this.id,
     required this.year,
@@ -1109,6 +1135,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
     required this.weekComplete,
     this.dayQuestionIdsJson,
     this.reviewQuestionIdsJson,
+    this.dayStartedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1133,6 +1160,9 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
     }
     if (!nullToAbsent || reviewQuestionIdsJson != null) {
       map['review_question_ids_json'] = Variable<String>(reviewQuestionIdsJson);
+    }
+    if (!nullToAbsent || dayStartedAt != null) {
+      map['day_started_at'] = Variable<DateTime>(dayStartedAt);
     }
     return map;
   }
@@ -1160,6 +1190,9 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
       reviewQuestionIdsJson: reviewQuestionIdsJson == null && nullToAbsent
           ? const Value.absent()
           : Value(reviewQuestionIdsJson),
+      dayStartedAt: dayStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dayStartedAt),
     );
   }
 
@@ -1188,6 +1221,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
       reviewQuestionIdsJson: serializer.fromJson<String?>(
         json['reviewQuestionIdsJson'],
       ),
+      dayStartedAt: serializer.fromJson<DateTime?>(json['dayStartedAt']),
     );
   }
   @override
@@ -1211,6 +1245,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
       'reviewQuestionIdsJson': serializer.toJson<String?>(
         reviewQuestionIdsJson,
       ),
+      'dayStartedAt': serializer.toJson<DateTime?>(dayStartedAt),
     };
   }
 
@@ -1230,6 +1265,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
     bool? weekComplete,
     Value<String?> dayQuestionIdsJson = const Value.absent(),
     Value<String?> reviewQuestionIdsJson = const Value.absent(),
+    Value<DateTime?> dayStartedAt = const Value.absent(),
   }) => ExamSession(
     id: id ?? this.id,
     year: year ?? this.year,
@@ -1250,6 +1286,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
     reviewQuestionIdsJson: reviewQuestionIdsJson.present
         ? reviewQuestionIdsJson.value
         : this.reviewQuestionIdsJson,
+    dayStartedAt: dayStartedAt.present ? dayStartedAt.value : this.dayStartedAt,
   );
   ExamSession copyWithCompanion(ExamSessionsCompanion data) {
     return ExamSession(
@@ -1276,6 +1313,9 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
       reviewQuestionIdsJson: data.reviewQuestionIdsJson.present
           ? data.reviewQuestionIdsJson.value
           : this.reviewQuestionIdsJson,
+      dayStartedAt: data.dayStartedAt.present
+          ? data.dayStartedAt.value
+          : this.dayStartedAt,
     );
   }
 
@@ -1296,7 +1336,8 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
           ..write('hanamaruDays: $hanamaruDays, ')
           ..write('weekComplete: $weekComplete, ')
           ..write('dayQuestionIdsJson: $dayQuestionIdsJson, ')
-          ..write('reviewQuestionIdsJson: $reviewQuestionIdsJson')
+          ..write('reviewQuestionIdsJson: $reviewQuestionIdsJson, ')
+          ..write('dayStartedAt: $dayStartedAt')
           ..write(')'))
         .toString();
   }
@@ -1318,6 +1359,7 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
     weekComplete,
     dayQuestionIdsJson,
     reviewQuestionIdsJson,
+    dayStartedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1337,7 +1379,8 @@ class ExamSession extends DataClass implements Insertable<ExamSession> {
           other.hanamaruDays == this.hanamaruDays &&
           other.weekComplete == this.weekComplete &&
           other.dayQuestionIdsJson == this.dayQuestionIdsJson &&
-          other.reviewQuestionIdsJson == this.reviewQuestionIdsJson);
+          other.reviewQuestionIdsJson == this.reviewQuestionIdsJson &&
+          other.dayStartedAt == this.dayStartedAt);
 }
 
 class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
@@ -1356,6 +1399,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
   final Value<bool> weekComplete;
   final Value<String?> dayQuestionIdsJson;
   final Value<String?> reviewQuestionIdsJson;
+  final Value<DateTime?> dayStartedAt;
   final Value<int> rowid;
   const ExamSessionsCompanion({
     this.id = const Value.absent(),
@@ -1373,6 +1417,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
     this.weekComplete = const Value.absent(),
     this.dayQuestionIdsJson = const Value.absent(),
     this.reviewQuestionIdsJson = const Value.absent(),
+    this.dayStartedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExamSessionsCompanion.insert({
@@ -1391,6 +1436,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
     this.weekComplete = const Value.absent(),
     this.dayQuestionIdsJson = const Value.absent(),
     this.reviewQuestionIdsJson = const Value.absent(),
+    this.dayStartedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        year = Value(year),
@@ -1413,6 +1459,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
     Expression<bool>? weekComplete,
     Expression<String>? dayQuestionIdsJson,
     Expression<String>? reviewQuestionIdsJson,
+    Expression<DateTime>? dayStartedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1433,6 +1480,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
         'day_question_ids_json': dayQuestionIdsJson,
       if (reviewQuestionIdsJson != null)
         'review_question_ids_json': reviewQuestionIdsJson,
+      if (dayStartedAt != null) 'day_started_at': dayStartedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1453,6 +1501,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
     Value<bool>? weekComplete,
     Value<String?>? dayQuestionIdsJson,
     Value<String?>? reviewQuestionIdsJson,
+    Value<DateTime?>? dayStartedAt,
     Value<int>? rowid,
   }) {
     return ExamSessionsCompanion(
@@ -1472,6 +1521,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
       dayQuestionIdsJson: dayQuestionIdsJson ?? this.dayQuestionIdsJson,
       reviewQuestionIdsJson:
           reviewQuestionIdsJson ?? this.reviewQuestionIdsJson,
+      dayStartedAt: dayStartedAt ?? this.dayStartedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1526,6 +1576,9 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
         reviewQuestionIdsJson.value,
       );
     }
+    if (dayStartedAt.present) {
+      map['day_started_at'] = Variable<DateTime>(dayStartedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1550,6 +1603,7 @@ class ExamSessionsCompanion extends UpdateCompanion<ExamSession> {
           ..write('weekComplete: $weekComplete, ')
           ..write('dayQuestionIdsJson: $dayQuestionIdsJson, ')
           ..write('reviewQuestionIdsJson: $reviewQuestionIdsJson, ')
+          ..write('dayStartedAt: $dayStartedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4197,6 +4251,7 @@ typedef $$ExamSessionsTableCreateCompanionBuilder =
       Value<bool> weekComplete,
       Value<String?> dayQuestionIdsJson,
       Value<String?> reviewQuestionIdsJson,
+      Value<DateTime?> dayStartedAt,
       Value<int> rowid,
     });
 typedef $$ExamSessionsTableUpdateCompanionBuilder =
@@ -4216,6 +4271,7 @@ typedef $$ExamSessionsTableUpdateCompanionBuilder =
       Value<bool> weekComplete,
       Value<String?> dayQuestionIdsJson,
       Value<String?> reviewQuestionIdsJson,
+      Value<DateTime?> dayStartedAt,
       Value<int> rowid,
     });
 
@@ -4300,6 +4356,11 @@ class $$ExamSessionsTableFilterComposer
 
   ColumnFilters<String> get reviewQuestionIdsJson => $composableBuilder(
     column: $table.reviewQuestionIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dayStartedAt => $composableBuilder(
+    column: $table.dayStartedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4387,6 +4448,11 @@ class $$ExamSessionsTableOrderingComposer
     column: $table.reviewQuestionIdsJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get dayStartedAt => $composableBuilder(
+    column: $table.dayStartedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ExamSessionsTableAnnotationComposer
@@ -4450,6 +4516,11 @@ class $$ExamSessionsTableAnnotationComposer
     column: $table.reviewQuestionIdsJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get dayStartedAt => $composableBuilder(
+    column: $table.dayStartedAt,
+    builder: (column) => column,
+  );
 }
 
 class $$ExamSessionsTableTableManager
@@ -4498,6 +4569,7 @@ class $$ExamSessionsTableTableManager
                 Value<bool> weekComplete = const Value.absent(),
                 Value<String?> dayQuestionIdsJson = const Value.absent(),
                 Value<String?> reviewQuestionIdsJson = const Value.absent(),
+                Value<DateTime?> dayStartedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExamSessionsCompanion(
                 id: id,
@@ -4515,6 +4587,7 @@ class $$ExamSessionsTableTableManager
                 weekComplete: weekComplete,
                 dayQuestionIdsJson: dayQuestionIdsJson,
                 reviewQuestionIdsJson: reviewQuestionIdsJson,
+                dayStartedAt: dayStartedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4534,6 +4607,7 @@ class $$ExamSessionsTableTableManager
                 Value<bool> weekComplete = const Value.absent(),
                 Value<String?> dayQuestionIdsJson = const Value.absent(),
                 Value<String?> reviewQuestionIdsJson = const Value.absent(),
+                Value<DateTime?> dayStartedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExamSessionsCompanion.insert(
                 id: id,
@@ -4551,6 +4625,7 @@ class $$ExamSessionsTableTableManager
                 weekComplete: weekComplete,
                 dayQuestionIdsJson: dayQuestionIdsJson,
                 reviewQuestionIdsJson: reviewQuestionIdsJson,
+                dayStartedAt: dayStartedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -61,6 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    // 日付が変わっていれば、クイズを開始する前でもここで day を進めておく
+    // (ホーム画面を開いただけで「今日のDay」が正しく表示されるようにするため)。
+    if (session != null) {
+      session = await appState.examRepo.ensureDayProgress(session);
+    }
+
     final dayScores = session != null
         ? await appState.examRepo.getBestScoresByDay(session.id)
         : <int, int>{};

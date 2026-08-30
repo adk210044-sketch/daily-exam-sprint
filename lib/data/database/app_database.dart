@@ -22,7 +22,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -42,6 +42,12 @@ class AppDatabase extends _$AppDatabase {
         // 既存インストールでは 0 から開始し、QuestionImporter が
         // currentContentVersion との比較で再インポートの必要性を判定する。
         await m.addColumn(userSettings, userSettings.contentVersion);
+      }
+      if (from < 5) {
+        // Day進行を「満点判定」から「暦日判定」に変更するための開始日カラム。
+        // 既存セッション(進行中)は NULL のままにしておき、初回アクセス時に
+        // ExamSessionRepository.ensureDayProgress() が「今日開始」として補完する。
+        await m.addColumn(examSessions, examSessions.dayStartedAt);
       }
     },
   );
