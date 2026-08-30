@@ -207,13 +207,18 @@ class ExamSessionRepository {
   /// 新しい9問に切り替わる」ため、満点かどうかに関わらず、日付が
   /// 変わった時点で自動的に day を進める。
   ///
+  /// 重要: 「経過した暦日数」ではなく「日付が変わったかどうか」だけで
+  /// 判定し、変わっていれば常に +1 する。これにより、アプリを開かなかった
+  /// 日は一切カウントされず、次にアプリを開いた日が「次の未消化のDay」に
+  /// なる (Day3を丸ごとスキップするようなことはない)。
+  /// 例: 1日目=Day1, 2日目=Day2, 3日目は開かず, 4日目に開く → Day3。
+  ///
   /// - 初回アクセス時 ([dayStartedAt] が null): 現在の day (0なら1) が
   ///   「今日から開始した」ものとして [dayStartedAt] を今日の日付に設定する。
   ///   (既存ユーザーのマイグレーション直後もこの分岐に入り、進行中の day は
   ///   保持したまま、以後の日付比較の起点として今日を記録するだけに留める)
-  /// - 2回目以降: 前回の [dayStartedAt] から経過した日数ぶん day を進め、
-  ///   [dayStartedAt] を今日に更新する。複数日分アクセスが空いた場合は
-  ///   その日数ぶんまとめて進む (最大7でクランプ)。
+  /// - 2回目以降: 前回の [dayStartedAt] と今日が異なる日であれば、
+  ///   経過日数に関わらず day を +1 のみ進め、[dayStartedAt] を今日に更新する。
   /// - 既に完走済み ([status] == 'completed') のセッションは変更しない。
   ///
   /// 戻り値: 更新後の [ExamSession] (変更がなければ渡された session をそのまま返す)。
@@ -241,10 +246,10 @@ class ExamSessionRepository {
       session.dayStartedAt!.month,
       session.dayStartedAt!.day,
     );
-    final daysPassed = today.difference(startedDate).inDays;
-    if (daysPassed <= 0) return session; // 同じ日にはまだ進めない
+    if (!today.isAfter(startedDate)) return session; // 同じ日にはまだ進めない
 
-    final newDay = min(session.day + daysPassed, 7);
+    // 経過日数に関わらず常に +1 のみ進める (未消化のDayを飛ばさないため)。
+    final newDay = min(session.day + 1, 7);
     await (db.update(
       db.examSessions,
     )..where((t) => t.id.equals(session.id))).write(

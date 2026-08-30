@@ -780,8 +780,8 @@ class _ScoreHistoryRow extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         const Text(
-          '※「おかわり」結果は除く',
-          style: TextStyle(fontSize: 9, color: ZenColors.inkMute),
+          '※「おかわり」結果は除く\n※試験を解かなかった日はカウントされません',
+          style: TextStyle(fontSize: 9, color: ZenColors.inkMute, height: 1.5),
         ),
       ],
     );

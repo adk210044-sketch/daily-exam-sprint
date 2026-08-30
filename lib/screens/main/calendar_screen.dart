@@ -465,6 +465,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ],
                       ),
                     )
+                  // 未来日は空欄のまま。過去・当日で記録がない (取り組みなし) 日は
+                  // "-" を表示し、「解かなかった日」であることを視覚的に示す。
+                  : (mark == null && !isFuture)
+                  ? const Text(
+                      '-',
+                      style: TextStyle(
+                        fontSize: 9,
+                        height: 1.0,
+                        color: ZenColors.inkMute,
+                      ),
+                    )
                   : null,
             ),
           ],
