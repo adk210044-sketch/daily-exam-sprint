@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/zen_tokens.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../main/home_screen.dart';
+import 'report_error_sheet.dart';
 
 /// 解説閲覧 (ZenExplanation) — 全9問振り返り
 class ExplanationScreen extends StatefulWidget {
@@ -231,6 +232,35 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () =>
+                          showReportErrorSheet(context, question: q),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.flag_outlined,
+                              size: 14,
+                              color: ZenColors.inkMute,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '解説に誤りを見つけた',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ZenColors.inkMute,
+                                letterSpacing: 0.4,
+                                decoration: TextDecoration.underline,
+                                decorationColor: ZenColors.inkMute,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

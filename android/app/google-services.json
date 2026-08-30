@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42894654335",
+    "project_id": "hygienecoach-nine",
+    "storage_bucket": "hygienecoach-nine.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42894654335:android:bb9692ccfeaa7d8ccc384a",
+        "android_client_info": {
+          "package_name": "com.dailyexamsprint.exam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf338Rb6aJ_ebjuZ19tfSk0WMXDP2_77Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -8,6 +8,7 @@ import '../../widgets/zen_widgets.dart';
 import 'question_review_sheet.dart';
 import 'question_screen.dart';
 import 'quit_confirm_sheet.dart';
+import 'report_error_sheet.dart';
 import 'result_screen.dart';
 
 /// Feedback (ZenFeedback) — 正誤判定 + 解説自動展開
@@ -258,7 +259,35 @@ class FeedbackScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () =>
+                              showReportErrorSheet(context, question: q),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.flag_outlined,
+                                  size: 14,
+                                  color: ZenColors.inkMute,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '解説に誤りを見つけた',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: ZenColors.inkMute,
+                                    letterSpacing: 0.4,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: ZenColors.inkMute,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
