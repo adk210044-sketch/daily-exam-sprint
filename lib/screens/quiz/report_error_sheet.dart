@@ -134,7 +134,7 @@ class _ReportErrorSheetContentState extends State<_ReportErrorSheetContent> {
             ),
             const SizedBox(height: 8),
             const Text(
-              '開発者に送信しました。\n確認のうえ、解説の修正を検討します。',
+              '貴重なご指摘をお寄せいただき、\n誠にありがとうございます。\nサービス改善に努めてまいります。',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
