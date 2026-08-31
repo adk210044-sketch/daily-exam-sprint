@@ -213,30 +213,59 @@ class ExamSessionRepository {
   /// なる (Day3を丸ごとスキップするようなことはない)。
   /// 例: 1日目=Day1, 2日目=Day2, 3日目は開かず, 4日目に開く → Day3。
   ///
-  /// - 初回アクセス時 ([dayStartedAt] が null): 現在の day (0なら1) が
-  ///   「今日から開始した」ものとして [dayStartedAt] を今日の日付に設定する。
-  ///   (既存ユーザーのマイグレーション直後もこの分岐に入り、進行中の day は
-  ///   保持したまま、以後の日付比較の起点として今日を記録するだけに留める)
+  /// - 初回アクセス時 ([dayStartedAt] が null): 現在の day (0なら1) と、
+  ///   カレンダー実績([calendarFloorDay] — CalendarMarksのdistinct日数+1)の
+  ///   大きい方を採用する。
+  ///   (旧バージョン(花丸判定でdayが進まない実装)からの移行時に、実際には
+  ///   複数日分カレンダーが埋まっているにも関わらず day が古い値のまま
+  ///   引き継がれてしまう不整合を補正するため)
   /// - 2回目以降: 前回の [dayStartedAt] と今日が異なる日であれば、
   ///   経過日数に関わらず day を +1 のみ進め、[dayStartedAt] を今日に更新する。
+  ///   このとき、カレンダー実績が (day+1) を上回っていればそちらを優先する。
+  /// - 同じ日に再度呼ばれた場合でも、カレンダー実績が現在の day を上回って
+  ///   いれば自動補正する (マイグレーション直後で今日中に発覚したケースの
+  ///   自己修復)。
   /// - 既に完走済み ([status] == 'completed') のセッションは変更しない。
   ///
   /// 戻り値: 更新後の [ExamSession] (変更がなければ渡された session をそのまま返す)。
   Future<ExamSession> ensureDayProgress(ExamSession session) async {
     if (session.status == 'completed') return session;
 
+    // 自己修復: 旧バージョンのバグ等により、実際には複数の暦日に渡って
+    // 解いたにも関わらず DailyProgress/AnswerLog が同じ day 番号のまま
+    // 記録されてしまっているケースを補正する。バグがなければ何もしない
+    // (毎回呼んでも安全な冪等処理)。
+    await _repairStuckDailyProgress(session.id);
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    // カレンダー実績(CalendarMarks)から「本来到達しているべき day」の下限を
+    // 算出する。CalendarMarks は「その暦日に完走したか」を日付ごとに1件だけ
+    // 記録するため、今日より前の distinct 日数 + 1 が、今日あるべき day の
+    // 下限になる。これにより、旧バージョン等の理由で session.day が
+    // カレンダー実績より遅れてしまった場合に自動的に補正できる
+    // (自己修復ロジック)。
+    final pastMarks =
+        await (db.select(db.calendarMarks)..where(
+              (t) =>
+                  t.sessionId.equals(session.id) &
+                  t.date.isSmallerThanValue(today),
+            ))
+            .get();
+    final pastDaysCount = pastMarks
+        .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
+        .toSet()
+        .length;
+    final calendarFloorDay = min(pastDaysCount + 1, 7);
+
     if (session.dayStartedAt == null) {
-      final startDay = session.day == 0 ? 1 : session.day;
+      final storedDay = session.day == 0 ? 1 : session.day;
+      final startDay = max(storedDay, calendarFloorDay);
       await (db.update(
         db.examSessions,
       )..where((t) => t.id.equals(session.id))).write(
-        ExamSessionsCompanion(
-          day: Value(startDay),
-          dayStartedAt: Value(today),
-        ),
+        ExamSessionsCompanion(day: Value(startDay), dayStartedAt: Value(today)),
       );
       return (await getSession(session.id)) ?? session;
     }
@@ -246,10 +275,25 @@ class ExamSessionRepository {
       session.dayStartedAt!.month,
       session.dayStartedAt!.day,
     );
-    if (!today.isAfter(startedDate)) return session; // 同じ日にはまだ進めない
+    final currentDay = session.day == 0 ? 1 : session.day;
+
+    if (!today.isAfter(startedDate)) {
+      // 同じ日にはまだ進めないが、カレンダー実績が session.day を上回って
+      // いる場合 (既にマイグレーション済みだが取り残されているケース) は
+      // 補正する。
+      if (calendarFloorDay > currentDay) {
+        await (db.update(db.examSessions)
+              ..where((t) => t.id.equals(session.id)))
+            .write(ExamSessionsCompanion(day: Value(calendarFloorDay)));
+        return (await getSession(session.id)) ?? session;
+      }
+      return session; // 同じ日にはまだ進めない
+    }
 
     // 経過日数に関わらず常に +1 のみ進める (未消化のDayを飛ばさないため)。
-    final newDay = min(session.day + 1, 7);
+    // ただし、カレンダー実績がそれ以上進んでいる場合はそちらを優先する
+    // (自己修復)。
+    final newDay = min(max(currentDay + 1, calendarFloorDay), 7);
     await (db.update(
       db.examSessions,
     )..where((t) => t.id.equals(session.id))).write(
@@ -260,6 +304,67 @@ class ExamSessionRepository {
       ),
     );
     return (await getSession(session.id)) ?? session;
+  }
+
+  /// 自己修復: 旧バージョンのバグ (Day進行が「満点判定」のままになっていた等)
+  /// により、実際には複数の暦日に渡って解答したにも関わらず、DailyProgress /
+  /// AnswerLog の day 番号 (1-5) が同じ値のまま記録されてしまっているケースを
+  /// 検出し、実際に完走した日付の順序 (completedAt の日付昇順) に基づいて
+  /// day 番号を正しく再割り当てする。
+  ///
+  /// 正常に動作しているデータに対しては、再割り当て結果が元の値と常に一致する
+  /// ため no-op となる (= 何度呼んでも安全な冪等処理)。
+  /// なお「おかわり」(replay) の完走は DailyProgress に記録されないため、
+  /// このロジックの対象には含まれない (影響を受けない)。
+  Future<void> _repairStuckDailyProgress(String sessionId) async {
+    final rows =
+        await (db.select(db.dailyProgress)..where(
+              (t) =>
+                  t.sessionId.equals(sessionId) &
+                  t.day.isBiggerOrEqualValue(1) &
+                  t.day.isSmallerOrEqualValue(5),
+            ))
+            .get();
+    if (rows.isEmpty) return;
+
+    DateTime dateOf(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+    // completedAt の日付(時刻を除く)を昇順に並べ、出現順に 1,2,3... を
+    // 正しい day 番号として割り当てる (最大5)。
+    final distinctDates =
+        rows.map((r) => dateOf(r.completedAt)).toSet().toList()..sort();
+    final correctDayOf = <DateTime, int>{};
+    for (var i = 0; i < distinctDates.length; i++) {
+      correctDayOf[distinctDates[i]] = min(i + 1, 5);
+    }
+
+    var changed = false;
+    for (final row in rows) {
+      final correctDay = correctDayOf[dateOf(row.completedAt)]!;
+      if (correctDay != row.day) {
+        changed = true;
+        await (db.update(db.dailyProgress)..where((t) => t.id.equals(row.id)))
+            .write(DailyProgressCompanion(day: Value(correctDay)));
+      }
+    }
+    if (!changed) return; // バグの兆候なし → AnswerLog側の補正も不要
+
+    // AnswerLog も同様に補正する (苦手復習セットの集計に使われるため)。
+    final logs =
+        await (db.select(db.answerLog)..where(
+              (t) =>
+                  t.sessionId.equals(sessionId) &
+                  t.day.isBiggerOrEqualValue(1) &
+                  t.day.isSmallerOrEqualValue(5),
+            ))
+            .get();
+    for (final log in logs) {
+      final correctDay = correctDayOf[dateOf(log.answeredAt)];
+      if (correctDay != null && correctDay != log.day) {
+        await (db.update(db.answerLog)..where((t) => t.id.equals(log.id)))
+            .write(AnswerLogCompanion(day: Value(correctDay)));
+      }
+    }
   }
 
   /// 挑戦開始時: attempt をインクリメント、status を in_progress に。
