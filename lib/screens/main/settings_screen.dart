@@ -8,6 +8,7 @@ import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
 import '../commerce/paywall_screen.dart';
 import 'calendar_screen.dart';
+import 'disclaimer_screen.dart';
 import 'home_screen.dart';
 import 'legal_text_screen.dart';
 import 'review_screen.dart';
@@ -338,6 +339,16 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                       _sectionLabel(''),
+                      _row(
+                        context,
+                        label: '本アプリについて(免責事項・公式情報源)',
+                        value: '',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const DisclaimerScreen(),
+                          ),
+                        ),
+                      ),
                       _row(
                         context,
                         label: '利用規約',
