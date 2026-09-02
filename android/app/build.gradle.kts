@@ -75,3 +75,15 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
+// Google Play で「最新の収益化機能を利用するには Billing Library 8.0.0 以上が必要」
+// と表示される件への対応: in_app_purchase (3.2.3) が内部で使用する
+// in_app_purchase_android は com.android.billingclient:billing:7.1.1 を要求するが、
+// Flutter/Dart SDKバージョン固定のためプラグイン自体を 0.5.0 へ上げられない。
+// そのため Gradle の依存関係解決を使い、実際にAPK/AABに同梱される
+// billingclient のネイティブ実装のみを 8.0.0 に強制する。
+configurations.all {
+    resolutionStrategy {
+        force("com.android.billingclient:billing:8.0.0")
+    }
+}
+
