@@ -29,6 +29,17 @@ class NotificationService {
 
     try {
       tz_data.initializeTimeZones();
+      // timezoneパッケージは初期化時、tz.local を UTC にする。
+      // setLocalLocation を呼ばないと、リマインダー時刻がUTC基準で解釈され
+      // 日本時間(JST=UTC+9)からズレて通知される不具合になるため、
+      // 本アプリは日本国内向け(衛生管理者試験)なので Asia/Tokyo を明示的に設定する。
+      try {
+        tz.setLocalLocation(tz.getLocation('Asia/Tokyo'));
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('setLocalLocation(Asia/Tokyo) failed: $e');
+        }
+      }
 
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
