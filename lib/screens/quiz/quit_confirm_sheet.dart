@@ -17,6 +17,10 @@ Future<bool?> showQuitConfirmSheet(BuildContext context) {
   } else {
     titleLabel = '今日の $total問を中断しますか？';
   }
+  // おかわり (過去の回の解き直し) のみ一時保存の対象外。
+  final String bodyLabel = quiz.isReplay
+      ? '進捗は保存されないため、\nもう一度、1問目から解くことになります。'
+      : '回答済みの問題は保存されるので、\n次回は途中から再開できます。';
   return showModalBottomSheet<bool>(
     context: context,
     backgroundColor: Colors.transparent,
@@ -51,10 +55,10 @@ Future<bool?> showQuitConfirmSheet(BuildContext context) {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              '進捗は保存されないため、\nもう一度、1問目から解くことになります。',
+            Text(
+              bodyLabel,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 color: ZenColors.inkSub,
                 height: 1.7,

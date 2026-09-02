@@ -98,6 +98,24 @@ class Reminders extends Table {
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 }
 
+/// 回答途中セッションの一時保存 (「今日の9問」/「苦手復習」)。
+/// id を固定値 (1=daily用, 2=review用) として使い、モードごとに常に最新の
+/// 中断状態を1件だけ保持する (おかわりは進捗に影響しないため対象外)。
+class QuizDrafts extends Table {
+  IntColumn get id => integer()(); // 1=daily, 2=review (固定)
+  TextColumn get mode => text()(); // 'daily' | 'review'
+  TextColumn get sessionId => text().nullable()(); // dailyモードのみ使用
+  IntColumn get day => integer().nullable()(); // dailyモードのみ使用 (1-7)
+  IntColumn get attempt => integer().nullable()(); // dailyモードのみ使用
+  TextColumn get questionIdsJson => text()(); // JSON List<String> (出題順)
+  TextColumn get chosenAnswersJson =>
+      text()(); // JSON List<int?> (questionIdsJsonと同じ順・同じ長さ、未回答はnull)
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// ユーザー設定 (単一行)
 class UserSettings extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();

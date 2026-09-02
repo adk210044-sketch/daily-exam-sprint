@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<int, int> _dayAttempts = {};
   bool _loading = true;
   bool _howOpen = false;
+  bool _hasResumableDraft = false;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _load() async {
     final appState = context.read<AppState>();
+    final quiz = context.read<QuizSessionProvider>();
     ExamSession? session;
     final currentId = appState.settings?.currentSessionId;
 
@@ -74,11 +76,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ? await appState.examRepo.getAttemptCountsByDay(session.id)
         : <int, int>{};
 
+    // 中断していた「今日の9問」の下書きが、現在のセッション・Dayに
+    // 対応するものであれば再開ボタンを表示する。
+    bool hasDraft = false;
+    if (session != null) {
+      final expectedDay = session.day == 0 ? 1 : session.day;
+      hasDraft = await quiz.hasResumableDailyDraft(
+        examSessionId: session.id,
+        expectedDay: expectedDay,
+      );
+    }
+
     if (!mounted) return;
     setState(() {
       _currentSession = session;
       _dayScores = dayScores;
       _dayAttempts = dayAttempts;
+      _hasResumableDraft = hasDraft;
       _loading = false;
     });
   }
@@ -107,7 +121,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (session == null) return;
 
     final quiz = context.read<QuizSessionProvider>();
-    await quiz.startDaily(session.id);
+    if (_hasResumableDraft) {
+      await quiz.resumeDaily(session.id);
+    } else {
+      await quiz.startDaily(session.id);
+    }
     if (!mounted) return;
     await Navigator.of(
       context,
@@ -497,7 +515,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        '本日 · ${session.attempt + 1}回目の挑戦',
+                                        _hasResumableDraft
+                                            ? '中断中 · 続きから再開'
+                                            : '本日 · ${session.attempt + 1}回目の挑戦',
                                         style: const TextStyle(
                                           fontSize: 11,
                                           color: ZenColors.inkSub,
@@ -537,7 +557,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(height: 20),
                                   ZenPrimaryButton(
-                                    label: '今日の $dailyN問 をはじめる',
+                                    label: _hasResumableDraft
+                                        ? '続きから再開する'
+                                        : '今日の $dailyN問 をはじめる',
                                     onPressed: _startToday,
                                   ),
                                   Builder(

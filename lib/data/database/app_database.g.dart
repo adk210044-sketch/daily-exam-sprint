@@ -3889,6 +3889,512 @@ class RemindersCompanion extends UpdateCompanion<Reminder> {
   }
 }
 
+class $QuizDraftsTable extends QuizDrafts
+    with TableInfo<$QuizDraftsTable, QuizDraft> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuizDraftsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+    'session_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<int> day = GeneratedColumn<int>(
+    'day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attemptMeta = const VerificationMeta(
+    'attempt',
+  );
+  @override
+  late final GeneratedColumn<int> attempt = GeneratedColumn<int>(
+    'attempt',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _questionIdsJsonMeta = const VerificationMeta(
+    'questionIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> questionIdsJson = GeneratedColumn<String>(
+    'question_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chosenAnswersJsonMeta = const VerificationMeta(
+    'chosenAnswersJson',
+  );
+  @override
+  late final GeneratedColumn<String> chosenAnswersJson =
+      GeneratedColumn<String>(
+        'chosen_answers_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    mode,
+    sessionId,
+    day,
+    attempt,
+    questionIdsJson,
+    chosenAnswersJson,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiz_drafts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuizDraft> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_modeMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+        _dayMeta,
+        day.isAcceptableOrUnknown(data['day']!, _dayMeta),
+      );
+    }
+    if (data.containsKey('attempt')) {
+      context.handle(
+        _attemptMeta,
+        attempt.isAcceptableOrUnknown(data['attempt']!, _attemptMeta),
+      );
+    }
+    if (data.containsKey('question_ids_json')) {
+      context.handle(
+        _questionIdsJsonMeta,
+        questionIdsJson.isAcceptableOrUnknown(
+          data['question_ids_json']!,
+          _questionIdsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_questionIdsJsonMeta);
+    }
+    if (data.containsKey('chosen_answers_json')) {
+      context.handle(
+        _chosenAnswersJsonMeta,
+        chosenAnswersJson.isAcceptableOrUnknown(
+          data['chosen_answers_json']!,
+          _chosenAnswersJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_chosenAnswersJsonMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuizDraft map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuizDraft(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      ),
+      day: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}day'],
+      ),
+      attempt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempt'],
+      ),
+      questionIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_ids_json'],
+      )!,
+      chosenAnswersJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chosen_answers_json'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QuizDraftsTable createAlias(String alias) {
+    return $QuizDraftsTable(attachedDatabase, alias);
+  }
+}
+
+class QuizDraft extends DataClass implements Insertable<QuizDraft> {
+  final int id;
+  final String mode;
+  final String? sessionId;
+  final int? day;
+  final int? attempt;
+  final String questionIdsJson;
+  final String chosenAnswersJson;
+  final DateTime updatedAt;
+  const QuizDraft({
+    required this.id,
+    required this.mode,
+    this.sessionId,
+    this.day,
+    this.attempt,
+    required this.questionIdsJson,
+    required this.chosenAnswersJson,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['mode'] = Variable<String>(mode);
+    if (!nullToAbsent || sessionId != null) {
+      map['session_id'] = Variable<String>(sessionId);
+    }
+    if (!nullToAbsent || day != null) {
+      map['day'] = Variable<int>(day);
+    }
+    if (!nullToAbsent || attempt != null) {
+      map['attempt'] = Variable<int>(attempt);
+    }
+    map['question_ids_json'] = Variable<String>(questionIdsJson);
+    map['chosen_answers_json'] = Variable<String>(chosenAnswersJson);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  QuizDraftsCompanion toCompanion(bool nullToAbsent) {
+    return QuizDraftsCompanion(
+      id: Value(id),
+      mode: Value(mode),
+      sessionId: sessionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sessionId),
+      day: day == null && nullToAbsent ? const Value.absent() : Value(day),
+      attempt: attempt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attempt),
+      questionIdsJson: Value(questionIdsJson),
+      chosenAnswersJson: Value(chosenAnswersJson),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory QuizDraft.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuizDraft(
+      id: serializer.fromJson<int>(json['id']),
+      mode: serializer.fromJson<String>(json['mode']),
+      sessionId: serializer.fromJson<String?>(json['sessionId']),
+      day: serializer.fromJson<int?>(json['day']),
+      attempt: serializer.fromJson<int?>(json['attempt']),
+      questionIdsJson: serializer.fromJson<String>(json['questionIdsJson']),
+      chosenAnswersJson: serializer.fromJson<String>(json['chosenAnswersJson']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'mode': serializer.toJson<String>(mode),
+      'sessionId': serializer.toJson<String?>(sessionId),
+      'day': serializer.toJson<int?>(day),
+      'attempt': serializer.toJson<int?>(attempt),
+      'questionIdsJson': serializer.toJson<String>(questionIdsJson),
+      'chosenAnswersJson': serializer.toJson<String>(chosenAnswersJson),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  QuizDraft copyWith({
+    int? id,
+    String? mode,
+    Value<String?> sessionId = const Value.absent(),
+    Value<int?> day = const Value.absent(),
+    Value<int?> attempt = const Value.absent(),
+    String? questionIdsJson,
+    String? chosenAnswersJson,
+    DateTime? updatedAt,
+  }) => QuizDraft(
+    id: id ?? this.id,
+    mode: mode ?? this.mode,
+    sessionId: sessionId.present ? sessionId.value : this.sessionId,
+    day: day.present ? day.value : this.day,
+    attempt: attempt.present ? attempt.value : this.attempt,
+    questionIdsJson: questionIdsJson ?? this.questionIdsJson,
+    chosenAnswersJson: chosenAnswersJson ?? this.chosenAnswersJson,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  QuizDraft copyWithCompanion(QuizDraftsCompanion data) {
+    return QuizDraft(
+      id: data.id.present ? data.id.value : this.id,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      day: data.day.present ? data.day.value : this.day,
+      attempt: data.attempt.present ? data.attempt.value : this.attempt,
+      questionIdsJson: data.questionIdsJson.present
+          ? data.questionIdsJson.value
+          : this.questionIdsJson,
+      chosenAnswersJson: data.chosenAnswersJson.present
+          ? data.chosenAnswersJson.value
+          : this.chosenAnswersJson,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizDraft(')
+          ..write('id: $id, ')
+          ..write('mode: $mode, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('day: $day, ')
+          ..write('attempt: $attempt, ')
+          ..write('questionIdsJson: $questionIdsJson, ')
+          ..write('chosenAnswersJson: $chosenAnswersJson, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    mode,
+    sessionId,
+    day,
+    attempt,
+    questionIdsJson,
+    chosenAnswersJson,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuizDraft &&
+          other.id == this.id &&
+          other.mode == this.mode &&
+          other.sessionId == this.sessionId &&
+          other.day == this.day &&
+          other.attempt == this.attempt &&
+          other.questionIdsJson == this.questionIdsJson &&
+          other.chosenAnswersJson == this.chosenAnswersJson &&
+          other.updatedAt == this.updatedAt);
+}
+
+class QuizDraftsCompanion extends UpdateCompanion<QuizDraft> {
+  final Value<int> id;
+  final Value<String> mode;
+  final Value<String?> sessionId;
+  final Value<int?> day;
+  final Value<int?> attempt;
+  final Value<String> questionIdsJson;
+  final Value<String> chosenAnswersJson;
+  final Value<DateTime> updatedAt;
+  const QuizDraftsCompanion({
+    this.id = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.attempt = const Value.absent(),
+    this.questionIdsJson = const Value.absent(),
+    this.chosenAnswersJson = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  QuizDraftsCompanion.insert({
+    this.id = const Value.absent(),
+    required String mode,
+    this.sessionId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.attempt = const Value.absent(),
+    required String questionIdsJson,
+    required String chosenAnswersJson,
+    required DateTime updatedAt,
+  }) : mode = Value(mode),
+       questionIdsJson = Value(questionIdsJson),
+       chosenAnswersJson = Value(chosenAnswersJson),
+       updatedAt = Value(updatedAt);
+  static Insertable<QuizDraft> custom({
+    Expression<int>? id,
+    Expression<String>? mode,
+    Expression<String>? sessionId,
+    Expression<int>? day,
+    Expression<int>? attempt,
+    Expression<String>? questionIdsJson,
+    Expression<String>? chosenAnswersJson,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (mode != null) 'mode': mode,
+      if (sessionId != null) 'session_id': sessionId,
+      if (day != null) 'day': day,
+      if (attempt != null) 'attempt': attempt,
+      if (questionIdsJson != null) 'question_ids_json': questionIdsJson,
+      if (chosenAnswersJson != null) 'chosen_answers_json': chosenAnswersJson,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  QuizDraftsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? mode,
+    Value<String?>? sessionId,
+    Value<int?>? day,
+    Value<int?>? attempt,
+    Value<String>? questionIdsJson,
+    Value<String>? chosenAnswersJson,
+    Value<DateTime>? updatedAt,
+  }) {
+    return QuizDraftsCompanion(
+      id: id ?? this.id,
+      mode: mode ?? this.mode,
+      sessionId: sessionId ?? this.sessionId,
+      day: day ?? this.day,
+      attempt: attempt ?? this.attempt,
+      questionIdsJson: questionIdsJson ?? this.questionIdsJson,
+      chosenAnswersJson: chosenAnswersJson ?? this.chosenAnswersJson,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<int>(day.value);
+    }
+    if (attempt.present) {
+      map['attempt'] = Variable<int>(attempt.value);
+    }
+    if (questionIdsJson.present) {
+      map['question_ids_json'] = Variable<String>(questionIdsJson.value);
+    }
+    if (chosenAnswersJson.present) {
+      map['chosen_answers_json'] = Variable<String>(chosenAnswersJson.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizDraftsCompanion(')
+          ..write('id: $id, ')
+          ..write('mode: $mode, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('day: $day, ')
+          ..write('attempt: $attempt, ')
+          ..write('questionIdsJson: $questionIdsJson, ')
+          ..write('chosenAnswersJson: $chosenAnswersJson, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3899,6 +4405,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CalendarMarksTable calendarMarks = $CalendarMarksTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
   late final $RemindersTable reminders = $RemindersTable(this);
+  late final $QuizDraftsTable quizDrafts = $QuizDraftsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3911,6 +4418,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     calendarMarks,
     userSettings,
     reminders,
+    quizDrafts,
   ];
 }
 
@@ -5829,6 +6337,258 @@ typedef $$RemindersTableProcessedTableManager =
       Reminder,
       PrefetchHooks Function()
     >;
+typedef $$QuizDraftsTableCreateCompanionBuilder =
+    QuizDraftsCompanion Function({
+      Value<int> id,
+      required String mode,
+      Value<String?> sessionId,
+      Value<int?> day,
+      Value<int?> attempt,
+      required String questionIdsJson,
+      required String chosenAnswersJson,
+      required DateTime updatedAt,
+    });
+typedef $$QuizDraftsTableUpdateCompanionBuilder =
+    QuizDraftsCompanion Function({
+      Value<int> id,
+      Value<String> mode,
+      Value<String?> sessionId,
+      Value<int?> day,
+      Value<int?> attempt,
+      Value<String> questionIdsJson,
+      Value<String> chosenAnswersJson,
+      Value<DateTime> updatedAt,
+    });
+
+class $$QuizDraftsTableFilterComposer
+    extends Composer<_$AppDatabase, $QuizDraftsTable> {
+  $$QuizDraftsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempt => $composableBuilder(
+    column: $table.attempt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionIdsJson => $composableBuilder(
+    column: $table.questionIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chosenAnswersJson => $composableBuilder(
+    column: $table.chosenAnswersJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuizDraftsTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuizDraftsTable> {
+  $$QuizDraftsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempt => $composableBuilder(
+    column: $table.attempt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionIdsJson => $composableBuilder(
+    column: $table.questionIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chosenAnswersJson => $composableBuilder(
+    column: $table.chosenAnswersJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuizDraftsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuizDraftsTable> {
+  $$QuizDraftsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<String> get sessionId =>
+      $composableBuilder(column: $table.sessionId, builder: (column) => column);
+
+  GeneratedColumn<int> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<int> get attempt =>
+      $composableBuilder(column: $table.attempt, builder: (column) => column);
+
+  GeneratedColumn<String> get questionIdsJson => $composableBuilder(
+    column: $table.questionIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get chosenAnswersJson => $composableBuilder(
+    column: $table.chosenAnswersJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$QuizDraftsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuizDraftsTable,
+          QuizDraft,
+          $$QuizDraftsTableFilterComposer,
+          $$QuizDraftsTableOrderingComposer,
+          $$QuizDraftsTableAnnotationComposer,
+          $$QuizDraftsTableCreateCompanionBuilder,
+          $$QuizDraftsTableUpdateCompanionBuilder,
+          (
+            QuizDraft,
+            BaseReferences<_$AppDatabase, $QuizDraftsTable, QuizDraft>,
+          ),
+          QuizDraft,
+          PrefetchHooks Function()
+        > {
+  $$QuizDraftsTableTableManager(_$AppDatabase db, $QuizDraftsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuizDraftsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuizDraftsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuizDraftsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> mode = const Value.absent(),
+                Value<String?> sessionId = const Value.absent(),
+                Value<int?> day = const Value.absent(),
+                Value<int?> attempt = const Value.absent(),
+                Value<String> questionIdsJson = const Value.absent(),
+                Value<String> chosenAnswersJson = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => QuizDraftsCompanion(
+                id: id,
+                mode: mode,
+                sessionId: sessionId,
+                day: day,
+                attempt: attempt,
+                questionIdsJson: questionIdsJson,
+                chosenAnswersJson: chosenAnswersJson,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String mode,
+                Value<String?> sessionId = const Value.absent(),
+                Value<int?> day = const Value.absent(),
+                Value<int?> attempt = const Value.absent(),
+                required String questionIdsJson,
+                required String chosenAnswersJson,
+                required DateTime updatedAt,
+              }) => QuizDraftsCompanion.insert(
+                id: id,
+                mode: mode,
+                sessionId: sessionId,
+                day: day,
+                attempt: attempt,
+                questionIdsJson: questionIdsJson,
+                chosenAnswersJson: chosenAnswersJson,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuizDraftsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuizDraftsTable,
+      QuizDraft,
+      $$QuizDraftsTableFilterComposer,
+      $$QuizDraftsTableOrderingComposer,
+      $$QuizDraftsTableAnnotationComposer,
+      $$QuizDraftsTableCreateCompanionBuilder,
+      $$QuizDraftsTableUpdateCompanionBuilder,
+      (QuizDraft, BaseReferences<_$AppDatabase, $QuizDraftsTable, QuizDraft>),
+      QuizDraft,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5847,4 +6607,6 @@ class $AppDatabaseManager {
       $$UserSettingsTableTableManager(_db, _db.userSettings);
   $$RemindersTableTableManager get reminders =>
       $$RemindersTableTableManager(_db, _db.reminders);
+  $$QuizDraftsTableTableManager get quizDrafts =>
+      $$QuizDraftsTableTableManager(_db, _db.quizDrafts);
 }

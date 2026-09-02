@@ -26,6 +26,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   int missedCount = 0;
   Map<String, int> byCategory = {};
   bool loading = true;
+  bool _hasResumableDraft = false;
 
   int get _dailyN => context.read<AppState>().dailyQuestionCount;
 
@@ -37,12 +38,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   Future<void> _load() async {
     final appState = context.read<AppState>();
+    final quiz = context.read<QuizSessionProvider>();
     final count = await appState.reviewRepo.getMissedCount();
     final byCat = await appState.reviewRepo.getMissedByCategory();
+    final hasDraft = await quiz.hasResumableReviewDraft();
     if (!mounted) return;
     setState(() {
       missedCount = count;
       byCategory = byCat;
+      _hasResumableDraft = hasDraft;
       loading = false;
     });
   }
@@ -71,10 +75,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<void> _startReview() async {
     final appState = context.read<AppState>();
     final quiz = context.read<QuizSessionProvider>();
-    await quiz.startReview(
-      purchased: appState.purchased,
-      dailyCount: appState.dailyQuestionCount,
-    );
+    if (_hasResumableDraft) {
+      await quiz.resumeReview();
+    } else {
+      await quiz.startReview(
+        purchased: appState.purchased,
+        dailyCount: appState.dailyQuestionCount,
+      );
+    }
     if (!mounted) return;
     await Navigator.of(
       context,
@@ -306,7 +314,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
                                   height: 52,
-                                  label: '苦手 $reviewCount問をはじめる',
+                                  label: _hasResumableDraft
+                                      ? '続きから再開する'
+                                      : '苦手 $reviewCount問をはじめる',
                                   onPressed: _startReview,
                                 ),
                                 if (!purchased && missedCount > _dailyN) ...[

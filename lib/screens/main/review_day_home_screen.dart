@@ -13,7 +13,7 @@ import 'review_screen.dart';
 import 'settings_screen.dart';
 
 /// Home 復習日版 (ZenReviewDayHome) — Day 6/7 用
-class ReviewDayHomeScreen extends StatelessWidget {
+class ReviewDayHomeScreen extends StatefulWidget {
   final ExamSession session;
   final VoidCallback onReload;
 
@@ -22,6 +22,35 @@ class ReviewDayHomeScreen extends StatelessWidget {
     required this.session,
     required this.onReload,
   });
+
+  @override
+  State<ReviewDayHomeScreen> createState() => _ReviewDayHomeScreenState();
+}
+
+class _ReviewDayHomeScreenState extends State<ReviewDayHomeScreen> {
+  bool _hasResumableDraft = false;
+  bool _checkedDraft = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkDraft());
+  }
+
+  Future<void> _checkDraft() async {
+    final quiz = context.read<QuizSessionProvider>();
+    final session = widget.session;
+    final expectedDay = session.day == 0 ? 1 : session.day;
+    final hasDraft = await quiz.hasResumableDailyDraft(
+      examSessionId: session.id,
+      expectedDay: expectedDay,
+    );
+    if (!mounted) return;
+    setState(() {
+      _hasResumableDraft = hasDraft;
+      _checkedDraft = true;
+    });
+  }
 
   void _onTabTap(BuildContext context, String key) {
     if (key == 'home') return;
@@ -44,16 +73,21 @@ class ReviewDayHomeScreen extends StatelessWidget {
 
   Future<void> _startReview(BuildContext context) async {
     final quiz = context.read<QuizSessionProvider>();
-    await quiz.startDaily(session.id);
+    if (_hasResumableDraft) {
+      await quiz.resumeDaily(widget.session.id);
+    } else {
+      await quiz.startDaily(widget.session.id);
+    }
     if (!context.mounted) return;
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const QuestionScreen()));
-    onReload();
+    widget.onReload();
   }
 
   @override
   Widget build(BuildContext context) {
+    final session = widget.session;
     final day = session.day;
     final today = DateTime.now();
     final dateStr = '${today.month}月${today.day}日';
@@ -184,9 +218,11 @@ class ReviewDayHomeScreen extends StatelessWidget {
                                     color: ZenColors.gold,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
-                                    'REVIEW DAY',
-                                    style: TextStyle(
+                                  child: Text(
+                                    _checkedDraft && _hasResumableDraft
+                                        ? '中断中'
+                                        : 'REVIEW DAY',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
@@ -231,7 +267,9 @@ class ReviewDayHomeScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
-                                  label: '復習の $dailyN問をはじめる',
+                                  label: _checkedDraft && _hasResumableDraft
+                                      ? '続きから再開する'
+                                      : '復習の $dailyN問をはじめる',
                                   onPressed: () => _startReview(context),
                                 ),
                               ],

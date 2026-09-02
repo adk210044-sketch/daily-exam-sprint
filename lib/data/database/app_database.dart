@@ -14,6 +14,7 @@ part 'app_database.g.dart';
     CalendarMarks,
     UserSettings,
     Reminders,
+    QuizDrafts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -22,7 +23,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +49,10 @@ class AppDatabase extends _$AppDatabase {
         // 既存セッション(進行中)は NULL のままにしておき、初回アクセス時に
         // ExamSessionRepository.ensureDayProgress() が「今日開始」として補完する。
         await m.addColumn(examSessions, examSessions.dayStartedAt);
+      }
+      if (from < 6) {
+        // 「今日の9問」/「苦手復習」を中断した際の一時保存用テーブル。
+        await m.createTable(quizDrafts);
       }
     },
   );

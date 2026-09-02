@@ -7,6 +7,11 @@ import '../database/app_database.dart';
 import '../models/quiz_question.dart';
 import '../services/day_split_service.dart';
 
+/// QuizDraft (一時保存) のモード種別。
+/// (providers/quiz_session_provider.dart の QuizMode と対応するが、
+/// データ層とプロバイダー層の依存方向を保つためここに独立して定義する)
+enum QuizModeName { daily, review }
+
 /// ExamSessions・DailyProgress・AnswerLog・CalendarMarks を扱うリポジトリ。
 /// 1週間サイクル (Day1-5 新問 + Day6-7 復習) の管理を担う。
 class ExamSessionRepository {
@@ -104,6 +109,17 @@ class ExamSessionRepository {
     );
 
     return sets.map((list) => list.map(QuizQuestion.fromRow).toList()).toList();
+  }
+
+  /// 問題ID配列を、その順序を保ったまま QuizQuestion のリストに変換する。
+  /// (下書き復元時に、保存済みの出題順を再現するために使用)
+  Future<List<QuizQuestion>> getQuestionsByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final rows = await (db.select(
+      db.questions,
+    )..where((t) => t.id.isIn(ids))).get();
+    final byId = {for (final r in rows) r.id: QuizQuestion.fromRow(r)};
+    return ids.map((id) => byId[id]).whereType<QuizQuestion>().toList();
   }
 
   /// 現在のDay (1-7) の出題問題を取得。Day6-7は復習(ミス率TOP9)を返す。
@@ -549,6 +565,54 @@ class ExamSessionRepository {
             ))
             .get();
     return rows;
+  }
+
+  /// 「今日の9問」下書きの固定ID
+  static const int draftIdDaily = 1;
+  /// 「苦手復習」下書きの固定ID
+  static const int draftIdReview = 2;
+
+  /// 中断時の回答途中セッションを一時保存する (daily/review共通)。
+  /// [sessionId]/[day]/[attempt] は daily モードのみ使用 (reviewはnullでよい)。
+  Future<void> saveQuizDraft({
+    required QuizModeName mode,
+    String? sessionId,
+    int? day,
+    int? attempt,
+    required List<String> questionIds,
+    required List<int?> chosenAnswers,
+  }) async {
+    final id = mode == QuizModeName.daily ? draftIdDaily : draftIdReview;
+    await db
+        .into(db.quizDrafts)
+        .insertOnConflictUpdate(
+          QuizDraftsCompanion.insert(
+            id: Value(id),
+            mode: mode.name,
+            sessionId: Value(sessionId),
+            day: Value(day),
+            attempt: Value(attempt),
+            questionIdsJson: jsonEncode(questionIds),
+            chosenAnswersJson: jsonEncode(chosenAnswers),
+            updatedAt: DateTime.now(),
+          ),
+        );
+  }
+
+  /// 指定モードの下書きを取得する (存在しなければ null)。
+  Future<QuizDraft?> getQuizDraft(QuizModeName mode) async {
+    final id = mode == QuizModeName.daily ? draftIdDaily : draftIdReview;
+    return (db.select(
+      db.quizDrafts,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  /// 指定モードの下書きを削除する (完走時・中断確定時に呼ぶ)。
+  Future<void> clearQuizDraft(QuizModeName mode) async {
+    final id = mode == QuizModeName.daily ? draftIdDaily : draftIdReview;
+    await (db.delete(
+      db.quizDrafts,
+    )..where((t) => t.id.equals(id))).go();
   }
 
   /// 連続日数 (streak) を計算
