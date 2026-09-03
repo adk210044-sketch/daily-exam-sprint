@@ -44,7 +44,17 @@ class NotificationService {
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
       );
-      const iosSettings = DarwinInitializationSettings();
+      // iOS/macOSはデフォルトで requestAlertPermission 等が true のため、
+      // initialize() を呼んだ瞬間にOS標準の許可ダイアログが表示されてしまう。
+      // これだとオンボーディングの独自説明画面(理由の説明)より先に
+      // システムダイアログが出てしまい、意図した順序と食い違う。
+      // Androidと同じく、許可リクエストは requestPermission() で明示的に
+      // 行うタイミングに統一するため、初期化時点では常にfalseにする。
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestSoundPermission: false,
+        requestBadgePermission: false,
+      );
       const settings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
