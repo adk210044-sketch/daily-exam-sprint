@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../providers/app_state.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/enso_circle.dart';
@@ -266,9 +267,32 @@ class _ResultScreenState extends State<ResultScreen> {
                   ZenTextLink(
                     label: 'もう一度、同じ問題に挑む',
                     onPressed: () async {
-                      final sid = quiz.sessionId;
-                      if (sid != null) {
-                        await quiz.startDaily(sid);
+                      // モードに応じて正しい再開始メソッドを呼ぶ。
+                      // (以前は daily 専用の startDaily しか呼んでおらず、
+                      //  苦手復習 (review) や おかわり (isReplay) の場合は
+                      //  何も再初期化されず、完走時点の最後の問題の
+                      //  インデックスに留まったまま QuestionScreen に
+                      //  遷移してしまい、「最後の1問だけが繰り返し表示
+                      //  される」不具合が発生していた)
+                      if (quiz.mode == QuizMode.review) {
+                        final appState = context.read<AppState>();
+                        await quiz.startReview(
+                          purchased: appState.purchased,
+                          dailyCount: appState.dailyQuestionCount,
+                        );
+                      } else if (quiz.isReplay) {
+                        final sid = quiz.sessionId;
+                        if (sid != null) {
+                          await quiz.startReplay(
+                            examSessionId: sid,
+                            replayDay: quiz.day,
+                          );
+                        }
+                      } else {
+                        final sid = quiz.sessionId;
+                        if (sid != null) {
+                          await quiz.startDaily(sid);
+                        }
                       }
                       if (context.mounted) {
                         Navigator.of(context).pushReplacement(
