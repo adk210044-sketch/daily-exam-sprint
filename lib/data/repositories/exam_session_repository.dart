@@ -60,25 +60,44 @@ class ExamSessionRepository {
   /// [dayQuestionIdsJson] には各Dayの「問題ID配列」を保存する。
   /// 最終日(Day5)は前日までの問題が再掲されるため、同一IDが他Dayにも
   /// 出現し得る (これは仕様上正しい挙動)。
+  ///
+  /// 【自己修復ロジック】
+  /// 過去のバージョンの buildDaySets() は「カテゴリごとに i % days で
+  /// 振り分ける」単純なロジックで、カテゴリの問題数が days で割り切れない
+  /// 場合に Day ごとの問題数が不均等 (例: [10,10,8,8,8]) になる不具合が
+  /// あった。この不具合が発生していた時期に作成された既存セッションは、
+  /// 不均等な分割結果が dayQuestionIdsJson にキャッシュされたまま残って
+  /// しまう (アルゴリズムを後から直しても、既存のキャッシュは自動更新
+  /// されないため)。また、法改正等で問題が出題対象から除外された場合も、
+  /// キャッシュ生成時にはまだ除外されていなかった問題IDがキャッシュに
+  /// 残っていると、該当Dayの問題数が1問減ってしまう。
+  /// → キャッシュから復元した結果、各Dayの問題数が期待値
+  ///   (dailyCount問、最終日もdailyCount問) と一致しない場合は、
+  ///   キャッシュを破棄して現在のロジックで再生成する。
   Future<List<List<QuizQuestion>>> ensureDaySets(ExamSession session) async {
     final allQuestions = await _fullQuestionsFor(session);
     final byId = {for (final q in allQuestions) q.id: q};
+    final dailyCount = DaySplitService.dailyCountForExamType(session.examType);
 
     if (session.dayQuestionIdsJson != null) {
       final Map<String, dynamic> stored =
           jsonDecode(session.dayQuestionIdsJson!) as Map<String, dynamic>;
       final result = <List<QuizQuestion>>[];
+      var isValid = true;
       for (var d = 1; d <= 5; d++) {
         final ids =
             (stored['$d'] as List<dynamic>?)
                 ?.map((e) => e.toString())
                 .toList() ??
             [];
-        result.add(
-          ids.map((id) => byId[id]).whereType<QuizQuestion>().toList(),
-        );
+        final qs = ids.map((id) => byId[id]).whereType<QuizQuestion>().toList();
+        if (qs.length != dailyCount) {
+          isValid = false;
+        }
+        result.add(qs);
       }
-      return result;
+      if (isValid) return result;
+      // 不整合を検出 → キャッシュを破棄し、下記の再生成ロジックへフォールスルー
     }
 
     // buildDaySets() 相当のロジックで生成
@@ -91,7 +110,6 @@ class ExamSessionRepository {
                   t.year.equals(session.year),
             ))
             .get();
-    final dailyCount = DaySplitService.dailyCountForExamType(session.examType);
     final sets = DaySplitService.buildDaySets(
       rows,
       dailyCount: dailyCount,
