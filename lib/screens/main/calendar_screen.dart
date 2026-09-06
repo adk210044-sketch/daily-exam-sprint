@@ -381,7 +381,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Text(
-                '※ 日付下の数字は正答率(%)を示します',
+                '※ 日付下の数字は、その日最後に受けた正答率(%)を示します',
                 style: TextStyle(fontSize: 10, color: ZenColors.inkMute),
               ),
             ),
