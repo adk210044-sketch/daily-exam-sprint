@@ -28,7 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   ExamSession? _currentSession;
   Map<int, int> _dayScores = {};
-  Map<int, int> _dayAttempts = {};
+  List<int> _todayScores = [];
   bool _loading = true;
   bool _howOpen = false;
   bool _hasResumableDraft = false;
@@ -72,9 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final dayScores = session != null
         ? await appState.examRepo.getBestScoresByDay(session.id)
         : <int, int>{};
-    final dayAttempts = session != null
-        ? await appState.examRepo.getAttemptCountsByDay(session.id)
-        : <int, int>{};
+    final todayScores = session != null
+        ? await appState.examRepo.getTodayAttemptScores(session.id)
+        : <int>[];
 
     // 中断していた「今日の9問」の下書きが、現在のセッション・Dayに
     // 対応するものであれば再開ボタンを表示する。
@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentSession = session;
       _dayScores = dayScores;
-      _dayAttempts = dayAttempts;
+      _todayScores = todayScores;
       _hasResumableDraft = hasDraft;
       _loading = false;
     });
@@ -649,12 +649,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    // Score history
+                    // Today's attempts history
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
-                      child: _ScoreHistoryRow(
-                        dayScores: _dayScores,
-                        dayAttempts: _dayAttempts,
+                      child: _TodayAttemptsRow(
+                        examLabel: session.label,
+                        scores: _todayScores,
                       ),
                     ),
                   ],
@@ -675,30 +675,36 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// 今回の試験サイクル (Day1-7) の各日スコアを表示する週間進捗バー。
-/// 曜日 (月〜日) ではなく、試験開始日を起点とした Day1〜7 で表示する
-/// (アプリはどの曜日からでも開始できるため)。
-class _ScoreHistoryRow extends StatelessWidget {
-  final Map<int, int> dayScores;
-  final Map<int, int> dayAttempts;
+/// 「今日の試験」表示: 本日中に挑戦した回数ごとの正答率を表示する。
+/// 翌日になるとデータの取得元 (getTodayAttemptScores) が本日分のみに
+/// 絞り込まれるため、自動的に表示がリセットされる。
+/// 列数(=本日の挑戦回数)が多い場合は横スクロールで閲覧できるようにする。
+class _TodayAttemptsRow extends StatelessWidget {
+  final String examLabel;
+  final List<int> scores;
 
-  const _ScoreHistoryRow({
-    required this.dayScores,
-    this.dayAttempts = const {},
-  });
+  const _TodayAttemptsRow({required this.examLabel, required this.scores});
+
+  static const double _colWidth = 56;
 
   @override
   Widget build(BuildContext context) {
-    final scored = dayScores.values.toList();
-    final avg = scored.isEmpty
-        ? 0
-        : (scored.reduce((a, b) => a + b) / scored.length).round();
+    final columns = List.generate(scores.length, (i) => i + 1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '今回の試験 · 平均 $avg%',
+        Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(text: '今日の試験'),
+              if (examLabel.isNotEmpty)
+                TextSpan(
+                  text: '  ·  $examLabel',
+                  style: const TextStyle(color: ZenColors.inkMute),
+                ),
+            ],
+          ),
           style: const TextStyle(
             fontSize: 11,
             letterSpacing: 1.6,
@@ -706,103 +712,65 @@ class _ScoreHistoryRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(7, (i) {
-            final day = i + 1;
-            final score = dayScores[day];
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 22,
-                      child: Center(
-                        child: Text(
-                          score != null ? '$score%' : '-',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                            color: score == null
-                                ? ZenColors.inkMute
-                                : (score == 100
-                                      ? ZenColors.gold
-                                      : ZenColors.ink),
+        if (columns.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'まだ本日の挑戦記録はありません',
+              style: TextStyle(fontSize: 12, color: ZenColors.inkMute),
+            ),
+          )
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: columns.map((n) {
+                final score = scores[n - 1];
+                return SizedBox(
+                  width: _colWidth,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 22,
+                        child: Center(
+                          child: Text(
+                            '$score%',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                              color: score == 100
+                                  ? ZenColors.gold
+                                  : ZenColors.ink,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      height: 22,
-                      child: Center(
-                        child: Text(
-                          'Day$day',
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: ZenColors.inkMute,
-                            fontWeight: FontWeight.w400,
+                      const SizedBox(height: 4),
+                      SizedBox(
+                        height: 22,
+                        child: Center(
+                          child: Text(
+                            '$n回目',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: ZenColors.inkMute,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    SizedBox(
-                      height: 40,
-                      child: (dayAttempts[day] ?? 0) > 0
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '${dayAttempts[day]}',
-                                        style: const TextStyle(
-                                          fontSize: 17,
-                                          height: 1.0,
-                                          fontWeight: FontWeight.w400,
-                                          color: ZenColors.inkMute,
-                                        ),
-                                      ),
-                                      const TextSpan(
-                                        text: '回',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          height: 1.0,
-                                          fontWeight: FontWeight.w400,
-                                          color: ZenColors.inkMute,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  '挑戦',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    height: 1.0,
-                                    fontWeight: FontWeight.w400,
-                                    color: ZenColors.inkMute,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : const SizedBox(),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         const SizedBox(height: 6),
         const Text(
-          '※「おかわり」結果は除く\n※試験を解かなかった日はカウントされません',
+          '※「おかわり」結果は除く',
           style: TextStyle(fontSize: 9, color: ZenColors.inkMute, height: 1.5),
         ),
       ],

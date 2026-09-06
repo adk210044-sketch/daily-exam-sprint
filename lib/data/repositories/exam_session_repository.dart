@@ -537,6 +537,29 @@ class ExamSessionRepository {
     return counts;
   }
 
+  /// 本日 (暦日) の中で行った挑戦を、挑戦回数の昇順に並べたスコア(%)一覧を取得する。
+  /// (Home画面の「今日の試験」表示用)
+  /// 「おかわり」(replay) の完走は DailyProgress に記録されないため、
+  /// このリストには自然に含まれない。
+  /// 日付が変われば対象範囲(本日0:00〜翌日0:00)が変わるため、
+  /// 呼び出し側は毎回この関数を呼ぶだけで「翌日リセット」が実現される。
+  Future<List<int>> getTodayAttemptScores(String sessionId) async {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayEnd = todayStart.add(const Duration(days: 1));
+    final rows =
+        await (db.select(db.dailyProgress)
+              ..where(
+                (t) =>
+                    t.sessionId.equals(sessionId) &
+                    t.completedAt.isBiggerOrEqualValue(todayStart) &
+                    t.completedAt.isSmallerThanValue(todayEnd),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.attempt)]))
+            .get();
+    return rows.map((r) => r.score).toList();
+  }
+
   /// 直近7日間のスコア履歴 (Home画面のミニバー用)
   Future<List<CalendarMark>> getRecentMarks({int days = 7}) async {
     final now = DateTime.now();
