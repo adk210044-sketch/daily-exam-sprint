@@ -74,23 +74,37 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  /// 週(7日分のセル)の中から、取り組みを開始した曜日インデックス(0=日〜6=土)と
-  /// 試験回の短縮ラベル(例: "R6.10")を取得する。
-  /// 複数の回が混在する場合は最初に見つかったものを表示する。
-  ({String shortLabel, int startIndex})? _weekExamInfo(List<int?> weekDays) {
+  /// 週(7日分のセル)の各曜日インデックス(0=日〜6=土)に対応する試験回の
+  /// 短縮ラベル(例: "R6.10")を求める。
+  ///
+  /// アプリ内の「Day1〜7」周期は暦日ベースで進むため、カレンダーの
+  /// 日〜土の週の境目とは無関係に試験回が切り替わる(=次の試験回が
+  /// スタートする)ことがある。そのため、この行の中で試験回が変わった
+  /// 場合は、その日から新しいラベルに切り替えて返す(1件目のマークだけを
+  /// 見て行全体に同じラベルを伸ばすと、週の途中で試験回が切り替わった
+  /// ケースを正しく表示できないため)。
+  ///
+  /// マークがない日 (未着手の未来日など) は、直前までに判明している
+  /// 試験回をそのまま引き継ぐ (その試験期間がまだ続いていることを示す
+  /// ため)。マークが1件も現れていない先頭部分は null (帯線を描かない)。
+  List<String?> _weekExamLabels(List<int?> weekDays) {
+    final labels = List<String?>.filled(weekDays.length, null);
+    String? current;
     for (var i = 0; i < weekDays.length; i++) {
       final d = weekDays[i];
-      if (d == null) continue;
-      final date = DateTime(viewMonth.year, viewMonth.month, d);
-      final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
-      if (mark?.sessionId != null) {
-        final session = sessionsById[mark!.sessionId];
-        if (session != null) {
-          return (shortLabel: _shortExamLabel(session.year), startIndex: i);
+      if (d != null) {
+        final date = DateTime(viewMonth.year, viewMonth.month, d);
+        final mark = marksByDate[DateFormat('yyyy-MM-dd').format(date)];
+        if (mark?.sessionId != null) {
+          final session = sessionsById[mark!.sessionId];
+          if (session != null) {
+            current = _shortExamLabel(session.year);
+          }
         }
       }
+      labels[i] = current;
     }
-    return null;
+    return labels;
   }
 
   /// "令和6年10月公表" -> "R6.10" のように短縮する。
@@ -255,7 +269,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 weekIdx * 7,
                                 weekIdx * 7 + 7,
                               );
-                              final examInfo = _weekExamInfo(weekDays);
+                              final examLabels = _weekExamLabels(weekDays);
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
@@ -283,12 +297,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                       child: Row(
                                         children: List.generate(7, (i) {
-                                          final showLine =
-                                              examInfo != null &&
-                                              i >= examInfo.startIndex;
+                                          final label = examLabels[i];
+                                          final showLine = label != null;
+                                          // ラベルは「前日と試験回が変わった
+                                          // 日」(=先頭、または直前と異なる)
+                                          // にのみ表示する。これにより、
+                                          // 週の途中で試験回が切り替わった
+                                          // 場合もその日から新しいラベルが
+                                          // 表示される。
                                           final showLabel =
-                                              examInfo != null &&
-                                              i == examInfo.startIndex;
+                                              label != null &&
+                                              (i == 0 || examLabels[i - 1] != label);
                                           return Expanded(
                                             child: SizedBox(
                                               height: 14,
@@ -310,7 +329,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                           ),
                                                       color: ZenColors.bg,
                                                       child: Text(
-                                                        examInfo.shortLabel,
+                                                        label,
                                                         style: const TextStyle(
                                                           fontSize: 9,
                                                           fontWeight:
