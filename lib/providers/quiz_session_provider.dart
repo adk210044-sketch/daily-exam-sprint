@@ -253,11 +253,31 @@ class QuizSessionProvider extends ChangeNotifier {
   static const String reviewSessionId = 'review';
 
   /// 選択肢を選んだ時に呼ぶ。正誤判定・ログ記録・進捗更新を行う。
+  ///
+  /// 【重複カウント防止】
+  /// 端末の戻る操作(Androidの物理/ジェスチャーバック、Web版のブラウザ戻る等)
+  /// によって、ナビゲーションスタックに残っている古い QuestionScreen に
+  /// 戻り、同じ問題(同じ currentIndex)に再度回答してしまうケースがある
+  /// (QuestionScreen→FeedbackScreen は push、FeedbackScreen→次の
+  /// QuestionScreen は pushReplacement のため、古い QuestionScreen が
+  /// スタックに残り続けることが原因)。
+  /// この場合、以前の回答結果を考慮せずに `if (correct) correctCount++`
+  /// してしまうと、同じ問題に2回正解した場合に correctCount が
+  /// totalQuestions を超えてしまい、スコアが100%を超える不具合が発生する。
+  /// → 「その問題への直前の回答が正解だったか」との差分のみを
+  ///   correctCount に反映することで、何度再回答しても二重カウントされない
+  ///   ようにする。
   Future<bool> answer(int choiceIndex) async {
     final q = currentQuestion;
     final correct = choiceIndex == q.correctIndex;
+    final previousChoice = chosenAnswers[currentIndex];
+    final wasCorrect = previousChoice != null && previousChoice == q.correctIndex;
     chosenAnswers[currentIndex] = choiceIndex;
-    if (correct) correctCount++;
+    if (correct && !wasCorrect) {
+      correctCount++;
+    } else if (!correct && wasCorrect) {
+      correctCount--;
+    }
 
     if (mode == QuizMode.daily && sessionId != null && !isReplay) {
       // 通常の「今日のN問」学習: 進捗に反映される正式なログ。

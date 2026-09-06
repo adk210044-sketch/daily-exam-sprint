@@ -271,6 +271,12 @@ class ExamSessionRepository {
     // (毎回呼んでも安全な冪等処理)。
     await _repairStuckDailyProgress(session.id);
 
+    // 自己修復: 旧バージョンのバグ (戻る操作で同じ問題に再回答すると
+    // correctCount が二重加算される不具合) により、100%を超えるスコアが
+    // DailyProgress / CalendarMarks に記録されてしまっているケースを
+    // 100%に補正する。バグがなければ何もしない (冪等処理)。
+    await _repairOverScoredProgress(session.id);
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -401,6 +407,41 @@ class ExamSessionRepository {
     }
   }
 
+  /// 自己修復: 旧バージョンのバグ (QuestionScreen→FeedbackScreen の画面遷移で
+  /// push を使っていたため、端末の戻る操作で古い問題画面に戻り、同じ問題に
+  /// 再回答すると correctCount が二重加算されてしまう不具合) により、
+  /// score が100%を超えて記録されてしまっている DailyProgress /
+  /// CalendarMarks を検出し、100%に補正する。
+  /// バグが修正された現在は新たに発生しないため、既存データのみが対象。
+  /// 正常なデータに対しては何もしない (冪等処理)。
+  Future<void> _repairOverScoredProgress(String sessionId) async {
+    final overScored =
+        await (db.select(db.dailyProgress)..where(
+              (t) => t.sessionId.equals(sessionId) & t.score.isBiggerThanValue(100),
+            ))
+            .get();
+    if (overScored.isEmpty) return;
+
+    for (final row in overScored) {
+      await (db.update(db.dailyProgress)..where((t) => t.id.equals(row.id)))
+          .write(const DailyProgressCompanion(score: Value(100)));
+    }
+
+    // CalendarMarks 側も、同セッションで100%超えのまま残っている日付を補正する。
+    // (CalendarMarks は日付単位でしか sessionId と紐付いていないため、
+    //  score>100 のレコードのみを対象に安全に補正する)
+    final overScoredMarks =
+        await (db.select(db.calendarMarks)..where(
+              (t) =>
+                  t.sessionId.equals(sessionId) & t.score.isBiggerThanValue(100),
+            ))
+            .get();
+    for (final row in overScoredMarks) {
+      await (db.update(db.calendarMarks)..where((t) => t.id.equals(row.id)))
+          .write(const CalendarMarksCompanion(score: Value(100)));
+    }
+  }
+
   /// 挑戦開始時: attempt をインクリメント、status を in_progress に。
   Future<void> startAttempt(String sessionId) async {
     final session0 = await getSession(sessionId);
@@ -452,10 +493,14 @@ class ExamSessionRepository {
     required int correctCount,
     required int totalQuestions,
   }) async {
+    // correctCount が totalQuestions を超えることは想定していないが、
+    // 万一の不整合 (二重カウント等) があってもスコアが100%を超えて
+    // 表示されないよう、念のため 0〜100 の範囲にクランプする。
+    final safeCorrectCount = correctCount.clamp(0, totalQuestions);
     final score = totalQuestions == 0
         ? 0
-        : ((correctCount / totalQuestions) * 100).round();
-    final hanamaru = correctCount == totalQuestions;
+        : ((safeCorrectCount / totalQuestions) * 100).round().clamp(0, 100);
+    final hanamaru = safeCorrectCount == totalQuestions && totalQuestions > 0;
 
     await db
         .into(db.dailyProgress)

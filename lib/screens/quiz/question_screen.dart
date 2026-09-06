@@ -128,7 +128,13 @@ class QuestionScreen extends StatelessWidget {
                                   onTap: () async {
                                     await quiz.answer(i);
                                     if (context.mounted) {
-                                      Navigator.of(context).push(
+                                      // pushReplacement を使い、古い
+                                      // QuestionScreen をスタックに残さない。
+                                      // (端末の戻る操作で過去の問題画面に
+                                      // 戻れてしまうと、同じ問題に再回答して
+                                      // correctCount が二重加算される
+                                      // 不具合の原因になるため)
+                                      Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
                                           builder: (_) =>
                                               FeedbackScreen(chosenIndex: i),
