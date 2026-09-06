@@ -407,6 +407,33 @@ class ExamSessionRepository {
     }
   }
 
+  /// このセッションが完走済み (Day7まで終えて [status] == 'completed') で、
+  /// かつ完走後に暦日が変わっている (= 2週目の初日 = 「Day8」) 場合に true
+  /// を返す。
+  ///
+  /// true の場合、ホーム画面は通常の「今日のN問」表示や復習日表示の代わりに
+  /// 「次の試験へ進む」プロンプトを表示し、ユーザーに次の試験回を選ばせる
+  /// べきタイミングであることを示す。
+  ///
+  /// 判定基準: [dayStartedAt] (Day7に取り組んでいた最後の暦日) より
+  /// 今日が後の日付であれば true。まだ完走した当日中であれば false
+  /// (その日のうちはDay7の復習を何度でも解けるようにするため)。
+  /// ユーザーが次の試験を選ぶまでは、日を跨ぐたびに何度でも true を返す
+  /// (選ぶまで他にやることがないため)。
+  Future<bool> isNextExamPromptDue(ExamSession session) async {
+    if (session.status != 'completed') return false;
+    final startedAt = session.dayStartedAt;
+    if (startedAt == null) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final startedDate = DateTime(
+      startedAt.year,
+      startedAt.month,
+      startedAt.day,
+    );
+    return today.isAfter(startedDate);
+  }
+
   /// 自己修復: 旧バージョンのバグ (QuestionScreen→FeedbackScreen の画面遷移で
   /// push を使っていたため、端末の戻る操作で古い問題画面に戻り、同じ問題に
   /// 再回答すると correctCount が二重加算されてしまう不具合) により、

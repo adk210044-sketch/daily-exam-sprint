@@ -13,6 +13,7 @@ import '../commerce/exam_selector_screen.dart';
 import '../commerce/paywall_screen.dart';
 import '../quiz/question_screen.dart';
 import 'calendar_screen.dart';
+import 'next_exam_prompt_screen.dart';
 import 'review_screen.dart';
 import 'settings_screen.dart';
 import 'review_day_home_screen.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
   bool _howOpen = false;
   bool _hasResumableDraft = false;
+  bool _showNextExamPrompt = false;
 
   @override
   void initState() {
@@ -69,6 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
       session = await appState.examRepo.ensureDayProgress(session);
     }
 
+    // 完走済み(Day7まで終えた)セッションで、かつ完走後に暦日が変わっている
+    // (=2週目の初日=「Day8」)場合は、通常のホーム表示の代わりに
+    // 「次の試験へ進む」プロンプトを表示する。
+    final showNextExamPrompt = session != null
+        ? await appState.examRepo.isNextExamPromptDue(session)
+        : false;
+
     final dayScores = session != null
         ? await appState.examRepo.getBestScoresByDay(session.id)
         : <int, int>{};
@@ -93,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _dayScores = dayScores;
       _todayScores = todayScores;
       _hasResumableDraft = hasDraft;
+      _showNextExamPrompt = showNextExamPrompt;
       _loading = false;
     });
   }
@@ -270,6 +280,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       );
+    }
+
+    // 2週目の初日 (Day8相当): 完走済みセッションで暦日が変わっている場合は
+    // 「次の試験へ進む」プロンプトを表示し、ユーザーに次の試験回を選ばせる。
+    if (_showNextExamPrompt) {
+      return NextExamPromptScreen(session: session, onReload: _load);
     }
 
     final day = session.day == 0 ? 1 : session.day;
