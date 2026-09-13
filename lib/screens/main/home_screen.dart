@@ -668,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Today's attempts history
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
-                      child: _TodayAttemptsRow(
+                      child: TodayAttemptsRow(
                         examLabel: session.label,
                         scores: _todayScores,
                       ),
@@ -688,108 +688,5 @@ class _HomeScreenState extends State<HomeScreen> {
   String _safeDailyLabel(String dateStr) {
     final n = context.read<AppState>().dailyQuestionCount;
     return 'DAILY $n  ·  $dateStr';
-  }
-}
-
-/// 「今日の試験」表示: 本日中に挑戦した回数ごとの正答率を表示する。
-/// 翌日になるとデータの取得元 (getTodayAttemptScores) が本日分のみに
-/// 絞り込まれるため、自動的に表示がリセットされる。
-/// 列数(=本日の挑戦回数)が多い場合は横スクロールで閲覧できるようにする。
-class _TodayAttemptsRow extends StatelessWidget {
-  final String examLabel;
-  final List<int> scores;
-
-  const _TodayAttemptsRow({required this.examLabel, required this.scores});
-
-  static const double _colWidth = 56;
-
-  @override
-  Widget build(BuildContext context) {
-    final columns = List.generate(scores.length, (i) => i + 1);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              const TextSpan(text: '今日の試験'),
-              if (examLabel.isNotEmpty)
-                TextSpan(
-                  text: '  ·  $examLabel',
-                  style: const TextStyle(color: ZenColors.inkMute),
-                ),
-            ],
-          ),
-          style: const TextStyle(
-            fontSize: 11,
-            letterSpacing: 1.6,
-            color: ZenColors.inkSub,
-          ),
-        ),
-        const SizedBox(height: 10),
-        if (columns.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              'まだ本日の挑戦記録はありません',
-              style: TextStyle(fontSize: 12, color: ZenColors.inkMute),
-            ),
-          )
-        else
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            reverse: true,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: columns.map((n) {
-                final score = scores[n - 1];
-                return SizedBox(
-                  width: _colWidth,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 22,
-                        child: Center(
-                          child: Text(
-                            '$score%',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w400,
-                              color: score == 100
-                                  ? ZenColors.gold
-                                  : ZenColors.ink,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      SizedBox(
-                        height: 22,
-                        child: Center(
-                          child: Text(
-                            '$n回目',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: ZenColors.inkMute,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        const SizedBox(height: 6),
-        const Text(
-          '※「おかわり」結果は除く',
-          style: TextStyle(fontSize: 9, color: ZenColors.inkMute, height: 1.5),
-        ),
-      ],
-    );
   }
 }

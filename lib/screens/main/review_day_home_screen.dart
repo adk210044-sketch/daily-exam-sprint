@@ -30,6 +30,7 @@ class ReviewDayHomeScreen extends StatefulWidget {
 class _ReviewDayHomeScreenState extends State<ReviewDayHomeScreen> {
   bool _hasResumableDraft = false;
   bool _checkedDraft = false;
+  List<int> _todayScores = [];
 
   @override
   void initState() {
@@ -39,16 +40,21 @@ class _ReviewDayHomeScreenState extends State<ReviewDayHomeScreen> {
 
   Future<void> _checkDraft() async {
     final quiz = context.read<QuizSessionProvider>();
+    final appState = context.read<AppState>();
     final session = widget.session;
     final expectedDay = session.day == 0 ? 1 : session.day;
     final hasDraft = await quiz.hasResumableDailyDraft(
       examSessionId: session.id,
       expectedDay: expectedDay,
     );
+    final todayScores = await appState.examRepo.getTodayAttemptScores(
+      session.id,
+    );
     if (!mounted) return;
     setState(() {
       _hasResumableDraft = hasDraft;
       _checkedDraft = true;
+      _todayScores = todayScores;
     });
   }
 
@@ -276,6 +282,14 @@ class _ReviewDayHomeScreenState extends State<ReviewDayHomeScreen> {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    // Today's attempts history
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
+                      child: TodayAttemptsRow(
+                        examLabel: session.label,
+                        scores: _todayScores,
                       ),
                     ),
                   ],
