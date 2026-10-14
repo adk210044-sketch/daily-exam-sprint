@@ -63,7 +63,7 @@ class PurchasedScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        '買い切り購入が完了しました。\n全11回分の過去問を、いつでも解けます。',
+                        '買い切り購入が完了しました。\n全14回分の過去問を、いつでも解けます。',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,

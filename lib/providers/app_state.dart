@@ -34,7 +34,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> init() async {
     await QuestionImporter(db).importIfNeeded();
-    await ExamSessionInitializer(db).initIfNeeded();
+    await ExamSessionInitializer(db).syncSessions();
     settings = await settingsRepo.getOrCreate();
     reminders = await reminderRepo.getAll();
     await NotificationService.instance.init();

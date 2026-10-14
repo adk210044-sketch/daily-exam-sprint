@@ -4,6 +4,15 @@ import '../database/app_database.dart';
 
 /// 令和年月ラベルの並び順 (新しい順)。ソート・直近判定に使用。
 /// 出典: 03_specs/dev_handoff_README.md / mockData.js の EXAM_SESSIONS
+///
+/// 【運用ルール】 新しい試験回の問題データ (exam_questions.json) を追加した際は、
+/// 必ずこのリストの先頭に新しい年度を追加すること。
+/// [ExamSessionInitializer.syncSessions] が起動の都度呼ばれ、
+/// ・まだ ExamSessions テーブルに存在しない年度を自動で追加
+/// ・直近2回 (kFreeExamCount) の isLatest / 全セッションの sortOrder を再計算
+/// するため、既存ユーザーの端末にも新しい試験回が自動的に反映される。
+/// (進捗データ: status/day/attempt/avgScore等は insertOnConflictUpdate が
+/// 明示的に指定したカラムのみ更新する Drift の仕様により、一切上書きされない)
 const List<String> kYearOrderNewestFirst = [
   '令和8年4月公表',
   '令和7年10月公表',
@@ -38,15 +47,17 @@ String _idFromYear(String year) {
   return 'r${m.group(1)}_$month';
 }
 
-/// Questions テーブルの実データから ExamSessions を生成する (初回のみ)。
+/// Questions テーブルの実データから ExamSessions を生成・同期する。
+/// 新規インストール時は全件作成、既存インストールでは不足分のみ追加し、
+/// isLatest / sortOrder を常に最新の [kYearOrderNewestFirst] に合わせて更新する。
 class ExamSessionInitializer {
   final AppDatabase db;
   ExamSessionInitializer(this.db);
 
-  Future<void> initIfNeeded() async {
-    final existing = await db.select(db.examSessions).get();
-    if (existing.isNotEmpty) return;
+  /// 後方互換のためのエイリアス。
+  Future<void> initIfNeeded() => syncSessions();
 
+  Future<void> syncSessions() async {
     for (final examType in ['type1', 'type2']) {
       final questions = await (db.select(
         db.questions,
@@ -66,6 +77,10 @@ class ExamSessionInitializer {
         final id = '${_idFromYear(year)}_$examType';
         final isLatest = i < kFreeExamCount;
 
+        // 新規行の作成、または isLatest/sortOrder/totalQ のみを更新。
+        // (Companion.insert で指定していない進捗系カラムは Value.absent()
+        //  となるため、insertOnConflictUpdate は既存行の進捗データを
+        //  一切変更しない)
         await db
             .into(db.examSessions)
             .insertOnConflictUpdate(

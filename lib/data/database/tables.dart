@@ -18,7 +18,7 @@ class Questions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-/// 試験セッション — 全11回分の進捗管理
+/// 試験セッション — 全14回分の進捗管理
 class ExamSessions extends Table {
   TextColumn get id => text()(); // e.g. "r6_10"
   TextColumn get year => text()(); // categoryのyearと一致

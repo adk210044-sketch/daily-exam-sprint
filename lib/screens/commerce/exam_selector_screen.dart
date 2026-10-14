@@ -10,7 +10,7 @@ import 'paywall_screen.dart';
 
 enum _FilterTab { all, done, doing, notStarted, locked }
 
-/// 試験選択画面 (ZenExamSelector) — 有料版: 全11回から選べる。
+/// 試験選択画面 (ZenExamSelector) — 有料版: 全14回から選べる。
 /// 無料版: 直近2回分のみ解放、残りはロック表示 + Paywall誘導。
 class ExamSelectorScreen extends StatefulWidget {
   const ExamSelectorScreen({super.key});

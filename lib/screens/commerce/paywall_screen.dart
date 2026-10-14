@@ -87,7 +87,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     const features = [
-      (title: '全過去問 解放', sub: '令和1年〜令和6年・全11回 · 400問以上'),
+      (title: '全過去問 解放', sub: '令和1年〜令和8年・全14回 · 1,000問以上'),
       (title: '選べる過去問', sub: '未着手・挑戦中・完走が一目でわかる'),
       (title: 'おかわり機能', sub: 'Day1〜5から好きな回を選んで解き直せる'),
       (title: '学習データを引き継ぎ', sub: '苦手・花丸・連続記録は、購入後もそのまま'),
@@ -390,7 +390,7 @@ class _CompareTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = [
-      (label: '過去問', free: '直近2回分', paid: '全11回分'),
+      (label: '過去問', free: '直近2回分', paid: '全14回分'),
       (label: '解く回を選ぶ', free: 'no', paid: 'yes'),
       (label: '苦手復習', free: '$dailyCount問まで', paid: '問題数 無制限'),
       (label: 'おかわり機能', free: 'no', paid: 'yes'),

@@ -22,7 +22,8 @@ class QuestionImporter {
   /// 履歴:
   ///   1: 初回リリース時点のデータ
   ///   2: 令和6年10月_12 / 令和4年10月_12 / 令和3年10月_15 の公式解説を修正
-  static const int currentContentVersion = 2;
+  ///   3: 令和7年4月・令和7年10月・令和8年4月 (222問) を追加
+  static const int currentContentVersion = 3;
 
   static int _extractNumberInt(String number) {
     final digits = RegExp(r'[0-9]+').firstMatch(number)?.group(0);
