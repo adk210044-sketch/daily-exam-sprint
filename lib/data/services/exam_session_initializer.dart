@@ -5,6 +5,9 @@ import '../database/app_database.dart';
 /// 令和年月ラベルの並び順 (新しい順)。ソート・直近判定に使用。
 /// 出典: 03_specs/dev_handoff_README.md / mockData.js の EXAM_SESSIONS
 const List<String> kYearOrderNewestFirst = [
+  '令和8年4月公表',
+  '令和7年10月公表',
+  '令和7年4月公表',
   '令和6年10月公表',
   '令和6年4月公表',
   '令和5年10月公表',
