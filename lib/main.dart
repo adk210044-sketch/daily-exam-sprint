@@ -62,7 +62,7 @@ class ZenHabitApp extends StatelessWidget {
                 seedColor: ZenColors.accent,
                 brightness: Brightness.light,
               ).copyWith(primary: ZenColors.accent, surface: ZenColors.bg),
-              fontFamily: 'Roboto',
+              fontFamily: 'NotoSansJP',
               textTheme: const TextTheme().apply(
                 bodyColor: ZenColors.ink,
                 displayColor: ZenColors.ink,
