@@ -181,7 +181,7 @@ void showQuestionReviewSheet(
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    q.choices[i],
+                                    QuizQuestion.displayChoice(q.choices[i]),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       height: 1.7,

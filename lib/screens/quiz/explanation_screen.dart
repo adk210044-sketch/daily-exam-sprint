@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../data/models/quiz_question.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../main/home_screen.dart';
 import 'report_error_sheet.dart';
@@ -188,7 +189,9 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    q.choices[q.correctIndex],
+                                    QuizQuestion.displayChoice(
+                                      q.choices[q.correctIndex],
+                                    ),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       height: 1.6,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../data/models/quiz_question.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/zen_widgets.dart';
 import 'feedback_screen.dart';
@@ -179,7 +180,9 @@ class QuestionScreen extends StatelessWidget {
                                         const SizedBox(width: 14),
                                         Expanded(
                                           child: Text(
-                                            q.choices[i],
+                                            QuizQuestion.displayChoice(
+                                              q.choices[i],
+                                            ),
                                             style: ZenText.choiceText(),
                                           ),
                                         ),

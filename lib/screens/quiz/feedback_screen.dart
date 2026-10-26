@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
+import '../../data/models/quiz_question.dart';
 import '../../providers/quiz_session_provider.dart';
 import '../../widgets/zen_widgets.dart';
 import 'question_review_sheet.dart';
@@ -176,13 +177,17 @@ class FeedbackScreen extends StatelessWidget {
                         if (!correct)
                           _answerBox(
                             label: 'あなた',
-                            text: q.choices[chosenIndex],
+                            text: QuizQuestion.displayChoice(
+                              q.choices[chosenIndex],
+                            ),
                             color: ZenColors.wrong,
                             bg: ZenColors.wrongSoft,
                           ),
                         _answerBox(
                           label: '正 解',
-                          text: q.choices[q.correctIndex],
+                          text: QuizQuestion.displayChoice(
+                            q.choices[q.correctIndex],
+                          ),
                           color: ZenColors.accentDeep,
                           bg: ZenColors.accentSoft,
                         ),
