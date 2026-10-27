@@ -177,6 +177,7 @@ class FeedbackScreen extends StatelessWidget {
                         if (!correct)
                           _answerBox(
                             label: 'あなた',
+                            number: chosenIndex + 1,
                             text: QuizQuestion.displayChoice(
                               q.choices[chosenIndex],
                             ),
@@ -185,6 +186,7 @@ class FeedbackScreen extends StatelessWidget {
                           ),
                         _answerBox(
                           label: '正 解',
+                          number: q.correctIndex + 1,
                           text: QuizQuestion.displayChoice(
                             q.choices[q.correctIndex],
                           ),
@@ -351,6 +353,7 @@ class FeedbackScreen extends StatelessWidget {
 
   Widget _answerBox({
     required String label,
+    required int number,
     required String text,
     required Color color,
     required Color bg,
@@ -378,7 +381,23 @@ class FeedbackScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
+          Container(
+            width: 20,
+            height: 20,
+            margin: const EdgeInsets.only(top: 1),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            child: Text(
+              '$number',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,

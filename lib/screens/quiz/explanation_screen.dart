@@ -186,6 +186,25 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                                     color: ZenColors.accentDeep,
                                   ),
                                 ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  width: 18,
+                                  height: 18,
+                                  margin: const EdgeInsets.only(top: 1),
+                                  alignment: Alignment.center,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: ZenColors.accentDeep,
+                                  ),
+                                  child: Text(
+                                    '${q.correctIndex + 1}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
