@@ -425,13 +425,12 @@ packages:
     source: hosted
     version: "3.2.3"
   in_app_purchase_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: in_app_purchase_android
-      sha256: "634bee4734b17fe55f370f0ac07a22431a9666e0f3a870c6d20350856e8bbf71"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0+10"
+      path: "third_party/in_app_purchase_android-0.5.0-patched"
+      relative: true
+    source: path
+    version: "0.5.0"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
