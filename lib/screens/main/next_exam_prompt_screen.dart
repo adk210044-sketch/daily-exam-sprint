@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/zen_tokens.dart';
 import '../../data/database/app_database.dart';
+import '../../providers/app_state.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
+import '../commerce/paywall_screen.dart';
 import 'calendar_screen.dart';
 import 'review_screen.dart';
 import 'settings_screen.dart';
@@ -19,10 +22,16 @@ class NextExamPromptScreen extends StatelessWidget {
   final ExamSession session;
   final VoidCallback onReload;
 
+  /// 無料枠(直近2回 or トライアル分)で解放されている試験回を
+  /// すべて完走し終えたタイミングで true になる。
+  /// true の場合、次の試験回を選ぶ前に能動的な購入誘導を表示する (提案2A)。
+  final bool showUpgradePrompt;
+
   const NextExamPromptScreen({
     super.key,
     required this.session,
     required this.onReload,
+    this.showUpgradePrompt = false,
   });
 
   void _onTabTap(BuildContext context, String key) {
@@ -51,8 +60,16 @@ class NextExamPromptScreen extends StatelessWidget {
     onReload();
   }
 
+  Future<void> _goToPaywall(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
+    onReload();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasFullAccess = context.watch<AppState>().hasFullAccess;
     return Scaffold(
       backgroundColor: ZenColors.bg,
       body: SafeArea(
@@ -161,20 +178,40 @@ class NextExamPromptScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const Text(
-                              'この試験回は完走しました。\n次の試験回を選んで、新しい1週間をはじめましょう。',
+                            Text(
+                              showUpgradePrompt && !hasFullAccess
+                                  ? 'この試験回は完走しました。\n無料で解ける試験はこれで全て終了です。'
+                                  : 'この試験回は完走しました。\n次の試験回を選んで、新しい1週間をはじめましょう。',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: ZenColors.inkSub,
                                 height: 1.8,
                               ),
                             ),
                             const SizedBox(height: 24),
-                            ZenPrimaryButton(
-                              label: '次の試験へ進む',
-                              onPressed: () => _goToExamSelector(context),
-                            ),
+                            if (showUpgradePrompt && !hasFullAccess) ...[
+                              ZenPrimaryButton(
+                                label: '全ての過去問を解放して続ける',
+                                onPressed: () => _goToPaywall(context),
+                              ),
+                              const SizedBox(height: 14),
+                              GestureDetector(
+                                onTap: () => _goToExamSelector(context),
+                                child: const Text(
+                                  '無料のまま、別の試験回を選ぶ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: ZenColors.inkMute,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ] else
+                              ZenPrimaryButton(
+                                label: '次の試験へ進む',
+                                onPressed: () => _goToExamSelector(context),
+                              ),
                           ],
                         ),
                       ),

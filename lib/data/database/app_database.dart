@@ -23,7 +23,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -53,6 +53,14 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         // 「今日の9問」/「苦手復習」を中断した際の一時保存用テーブル。
         await m.createTable(quizDrafts);
+      }
+      if (from < 7) {
+        // 「7日間フルアクセス体験」トライアルの開始日時。
+        // 既存インストール (アップデートで追加された場合) は意図的に null の
+        // ままにする = トライアル対象外として扱う (既存ユーザーに新たな
+        // 無期限無料期間を付与しないため)。新規インストールのみ
+        // SettingsRepository.getOrCreate() で現在時刻がセットされる。
+        await m.addColumn(userSettings, userSettings.firstLaunchAt);
       }
     },
   );

@@ -12,9 +12,18 @@ class SettingsRepository {
       db.userSettings,
     )..where((t) => t.id.equals(0))).getSingleOrNull();
     if (existing != null) return existing;
+    // 新規インストール: 「7日間フルアクセス体験」トライアルの起点として
+    // 現在時刻を記録する。既存インストール (マイグレーション経由で行が
+    // 既に存在するケース) はこの分岐を通らないため firstLaunchAt は
+    // null のまま = トライアル対象外になる。
     await db
         .into(db.userSettings)
-        .insert(const UserSettingsCompanion(id: Value(0)));
+        .insert(
+          UserSettingsCompanion(
+            id: const Value(0),
+            firstLaunchAt: Value(DateTime.now()),
+          ),
+        );
     return (await (db.select(
       db.userSettings,
     )..where((t) => t.id.equals(0))).getSingle());

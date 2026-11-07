@@ -190,6 +190,35 @@ class AppState extends ChangeNotifier {
   }
 
   bool get purchased => settings?.purchased ?? false;
+
+  /// 「7日間フルアクセス体験」トライアル期間の長さ。
+  static const Duration trialDuration = Duration(days: 7);
+
+  /// 現在トライアル期間中 (インストールから7日以内) かどうか。
+  /// 既存インストール (マイグレーションで firstLaunchAt が null のまま) は
+  /// 対象外として常に false を返す。購入済みの場合もトライアル判定は
+  /// 無意味だが false を返す (呼び出し側は hasFullAccess を使うこと)。
+  bool get isInTrial {
+    final start = settings?.firstLaunchAt;
+    if (start == null) return false;
+    return DateTime.now().isBefore(start.add(trialDuration));
+  }
+
+  /// トライアル残り日数 (切り上げ、0以上)。トライアル対象外/終了後は 0。
+  int get trialDaysRemaining {
+    final start = settings?.firstLaunchAt;
+    if (start == null) return 0;
+    final end = start.add(trialDuration);
+    final remaining = end.difference(DateTime.now());
+    if (remaining.isNegative) return 0;
+    // 端数の時間も「1日」として切り上げる (例: 残り3時間でも「残り1日」と表示)
+    return (remaining.inHours / 24).ceil().clamp(0, trialDuration.inDays);
+  }
+
+  /// 「全14回フルアクセス」を得られる条件 (購入済み or トライアル中)。
+  /// 試験選択のロック判定・苦手復習の無制限化などはこちらを使うこと。
+  bool get hasFullAccess => purchased || isInTrial;
+
   String get examType => settings?.examType ?? 'type1';
   int get dailyQuestionCount => examType == 'type1' ? 9 : 6;
 

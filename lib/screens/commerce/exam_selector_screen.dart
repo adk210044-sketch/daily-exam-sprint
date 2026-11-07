@@ -60,7 +60,8 @@ class _ExamSelectorScreenState extends State<ExamSelectorScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
-    final purchased = appState.purchased;
+    // 購入済み、または7日間トライアル期間中は全回フルアクセス扱いにする。
+    final purchased = appState.hasFullAccess;
 
     if (_loading) {
       return const Scaffold(

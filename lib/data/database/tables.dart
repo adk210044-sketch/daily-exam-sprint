@@ -134,6 +134,16 @@ class UserSettings extends Table {
   // insertOrReplace で更新する (ユーザーの進捗データには影響しない)。
   IntColumn get contentVersion => integer().withDefault(const Constant(0))();
 
+  // 「7日間フルアクセス体験」トライアルの開始日時。
+  // - 新規インストール時 (SettingsRepository.getOrCreate() で UserSettings
+  //   行を新規作成するタイミング) に現在時刻をセットする。
+  // - 既存インストール (マイグレーションで追加された場合) は null のままにし、
+  //   トライアル対象外として扱う (AppState.isInTrial は firstLaunchAt が
+  //   null の場合に false を返す)。
+  // - この日時から7日以内は全14回の試験回にフルアクセスでき、8日目以降は
+  //   通常の無料枠 (kFreeExamCount=直近2回) に自動的にダウングレードする。
+  DateTimeColumn get firstLaunchAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

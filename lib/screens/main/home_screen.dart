@@ -34,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _howOpen = false;
   bool _hasResumableDraft = false;
   bool _showNextExamPrompt = false;
+  bool _freeQuotaExhausted = false;
 
   @override
   void initState() {
@@ -78,6 +79,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ? await appState.examRepo.isNextExamPromptDue(session)
         : false;
 
+    // 無料枠(フルアクセスなし)のユーザーが、解放されている試験回を
+    // すべて完走したかどうか (= 無料で使える最後の試験回を完走したタイミング)。
+    // この場合、次の試験へ進むプロンプトに能動的なPaywall誘導を追加する (提案2A)。
+    var freeQuotaExhausted = false;
+    if (showNextExamPrompt && !appState.hasFullAccess) {
+      final all = await appState.examRepo.getAllSessions();
+      final freeSessions = all
+          .where((s) => s.examType == appState.examType && s.isLatest)
+          .toList();
+      freeQuotaExhausted =
+          freeSessions.isNotEmpty &&
+          freeSessions.every((s) => s.status == 'completed');
+    }
+
     final dayScores = session != null
         ? await appState.examRepo.getBestScoresByDay(session.id)
         : <int, int>{};
@@ -103,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _todayScores = todayScores;
       _hasResumableDraft = hasDraft;
       _showNextExamPrompt = showNextExamPrompt;
+      _freeQuotaExhausted = freeQuotaExhausted;
       _loading = false;
     });
   }
@@ -151,8 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (session == null) return;
     final appState = context.read<AppState>();
 
-    if (!appState.purchased) {
-      // 未購入ユーザー: 購入誘導としてPaywallへ
+    if (!appState.hasFullAccess) {
+      // 未購入 & トライアル対象外: 購入誘導としてPaywallへ
       await Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
@@ -161,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // 購入済みユーザー: この試験回の Day1-5 (過去・未来問わず全て) から選んで解ける
+    // 購入済み or トライアル中: この試験回の Day1-5 (過去・未来問わず全て) から選んで解ける
     final availableDays = List.generate(5, (i) => i + 1);
 
     final selectedDay = await showDialog<int>(
@@ -285,7 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // 2週目の初日 (Day8相当): 完走済みセッションで暦日が変わっている場合は
     // 「次の試験へ進む」プロンプトを表示し、ユーザーに次の試験回を選ばせる。
     if (_showNextExamPrompt) {
-      return NextExamPromptScreen(session: session, onReload: _load);
+      return NextExamPromptScreen(
+        session: session,
+        onReload: _load,
+        showUpgradePrompt: _freeQuotaExhausted,
+      );
     }
 
     final day = session.day == 0 ? 1 : session.day;
@@ -582,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     builder: (context) {
                                       final purchased = context
                                           .watch<AppState>()
-                                          .purchased;
+                                          .hasFullAccess;
                                       return Column(
                                         children: [
                                           const SizedBox(height: 10),

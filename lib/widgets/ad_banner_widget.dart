@@ -53,9 +53,9 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final purchased = context.watch<AppState>().purchased;
-    if (purchased || kIsWeb) {
-      // 有料版ユーザー or Web platform には広告を表示しない
+    final hasFullAccess = context.watch<AppState>().hasFullAccess;
+    if (hasFullAccess || kIsWeb) {
+      // 購入済み・7日間トライアル中のユーザー or Web platform には広告を表示しない
       return const SizedBox.shrink();
     }
 

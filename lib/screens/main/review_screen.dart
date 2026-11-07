@@ -79,7 +79,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       await quiz.resumeReview();
     } else {
       await quiz.startReview(
-        purchased: appState.purchased,
+        purchased: appState.hasFullAccess,
         dailyCount: appState.dailyQuestionCount,
       );
     }
@@ -198,7 +198,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     final categories = byCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final purchased = context.watch<AppState>().purchased;
+    final purchased = context.watch<AppState>().hasFullAccess;
     // 実際に出題される問題数 (無料版は dailyN問に制限、有料版は取りこぼし全問)
     final reviewCount = purchased ? missedCount : min(missedCount, _dailyN);
 
@@ -311,6 +311,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                     height: 1.6,
                                   ),
                                 ),
+                                if (!purchased) ...[
+                                  const SizedBox(height: 18),
+                                  _ReviewCapProgress(
+                                    missedCount: missedCount,
+                                    dailyN: _dailyN,
+                                  ),
+                                ],
                                 const SizedBox(height: 22),
                                 ZenPrimaryButton(
                                   height: 52,
@@ -400,6 +407,70 @@ class _ReviewScreenState extends State<ReviewScreen> {
             ZenBottomTab(active: 'review', onTap: _onTabTap),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 苦手復習の無料上限 (dailyN問) に対する今日の消化状況を可視化するバー。
+/// 「本日あと◯問で復習上限」という形で、無料枠の希少性を伝える (訴求B)。
+class _ReviewCapProgress extends StatelessWidget {
+  final int missedCount;
+  final int dailyN;
+  const _ReviewCapProgress({required this.missedCount, required this.dailyN});
+
+  @override
+  Widget build(BuildContext context) {
+    final used = missedCount.clamp(0, dailyN);
+    final remaining = (dailyN - used).clamp(0, dailyN);
+    final ratio = dailyN == 0 ? 0.0 : used / dailyN;
+    final isFull = remaining == 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: ZenColors.bg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: ZenColors.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '無料版 · 復習できる上限',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: ZenColors.inkMute,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Text(
+                isFull ? '上限に到達 ($dailyN問)' : 'あと $remaining問で上限',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isFull ? ZenColors.wrong : ZenColors.accentDeep,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: ratio.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: ZenColors.line,
+              valueColor: AlwaysStoppedAnimation(
+                isFull ? ZenColors.wrong : ZenColors.accent,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

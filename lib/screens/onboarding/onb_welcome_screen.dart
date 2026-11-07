@@ -94,7 +94,7 @@ class OnbWelcomeScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            '2週間 (14日) 無料。\n過去の試験2回分の全問題が使えます。',
+                            '最初の7日間は、全14回・1,000問以上が使い放題。\n8日目以降は直近2回分が、ずっと無料で使えます。',
                             style: TextStyle(
                               fontSize: 13,
                               color: ZenColors.ink,

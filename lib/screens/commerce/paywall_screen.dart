@@ -8,6 +8,23 @@ import '../../widgets/enso_circle.dart';
 import '../main/legal_text_screen.dart';
 import 'purchased_screen.dart';
 
+/// 価格文字列 (例: "¥780") から数値を抽出する。パース不能な場合は null。
+int? _extractYen(String? priceStr) {
+  if (priceStr == null) return null;
+  final digits = RegExp(r'[\d,]+').firstMatch(priceStr)?.group(0);
+  if (digits == null) return null;
+  return int.tryParse(digits.replaceAll(',', ''));
+}
+
+/// 「買い切り価格を1年間 (365日) 使うとしたら1日あたりいくらか」を計算する。
+/// 買い切りなので実際には期間の制約はないが、日割り換算は価格の「軽さ」を
+/// 直感的に伝えるための訴求表現 (提案D)。
+String _perDayLabel(String? priceStr) {
+  final yen = _extractYen(priceStr) ?? 780;
+  final perDay = (yen / 365).ceil();
+  return '¥$yen ＝ 1日あたり 約¥$perDay';
+}
+
 /// Paywall (ZenPaywall) — ¥780 買い切りの明快な提示。
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -152,7 +169,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            '過去 11回分の\n試験を、あなたの手に。',
+                            '全 14回分の\n試験を、あなたの手に。',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 26,
@@ -252,6 +269,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
               padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
               child: Column(
                 children: [
+                  Text(
+                    _perDayLabel(PurchaseService.instance.product?.price),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: ZenColors.inkMute,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
                     height: 58,
@@ -390,129 +416,148 @@ class _CompareTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = [
-      (label: '過去問', free: '直近2回分', paid: '全14回分'),
+      (label: '過去問', free: '直近2回分 ※1', paid: '全14回分'),
       (label: '解く回を選ぶ', free: 'no', paid: 'yes'),
       (label: '苦手復習', free: '$dailyCount問まで', paid: '問題数 無制限'),
       (label: 'おかわり機能', free: 'no', paid: 'yes'),
+      (label: '合格可能性診断', free: 'no', paid: 'yes'),
+      (label: '模試試験モード', free: 'no', paid: 'yes'),
       (label: '広告', free: 'あり', paid: 'なし'),
     ];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: ZenColors.card,
-          border: Border.all(color: ZenColors.line),
-          borderRadius: BorderRadius.circular(ZenColors.radiusCard),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            // Header row
-            Container(
-              color: ZenColors.bgSub,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 13,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Text(
-                        'COMPARE',
-                        style: ZenText.kicker(letterSpacing: 1.4),
-                      ),
-                    ),
-                  ),
-                  const Expanded(
-                    flex: 10,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        '無料',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: ZenColors.inkSub,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 10,
-                    child: Container(
-                      color: ZenColors.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: const Text(
-                        '有料',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: ZenColors.accentInk,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: ZenColors.card,
+              border: Border.all(color: ZenColors.line),
+              borderRadius: BorderRadius.circular(ZenColors.radiusCard),
             ),
-            ...List.generate(rows.length, (i) {
-              final r = rows[i];
-              final isLast = i == rows.length - 1;
-              return Container(
-                decoration: BoxDecoration(
-                  border: isLast
-                      ? null
-                      : const Border(
-                          bottom: BorderSide(color: ZenColors.line, width: 0.5),
-                        ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 13,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 11,
-                        ),
-                        child: Text(
-                          r.label,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: ZenColors.ink,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                // Header row
+                Container(
+                  color: ZenColors.bgSub,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 13,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          child: Text(
+                            'COMPARE',
+                            style: ZenText.kicker(letterSpacing: 1.4),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 10,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 11),
-                        child: _cell(r.free, isPaid: false),
+                      const Expanded(
+                        flex: 10,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Text(
+                            '無料',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: ZenColors.inkSub,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 11),
-                        color: ZenColors.accentSoft.withValues(alpha: 0.4),
-                        child: _cell(r.paid, isPaid: true),
+                      Expanded(
+                        flex: 10,
+                        child: Container(
+                          color: ZenColors.accent,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: const Text(
+                            '有料',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: ZenColors.accentInk,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              );
-            }),
-          ],
-        ),
+                ...List.generate(rows.length, (i) {
+                  final r = rows[i];
+                  final isLast = i == rows.length - 1;
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: isLast
+                          ? null
+                          : const Border(
+                              bottom: BorderSide(
+                                color: ZenColors.line,
+                                width: 0.5,
+                              ),
+                            ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 13,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 11,
+                            ),
+                            child: Text(
+                              r.label,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: ZenColors.ink,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 10,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                            child: _cell(r.free, isPaid: false),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                            color: ZenColors.accentSoft.withValues(alpha: 0.4),
+                            child: _cell(r.paid, isPaid: true),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(4, 8, 4, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '※1 インストールから7日間は全14回が無料で使い放題。8日目以降は直近2回分が無料です。',
+                style: TextStyle(fontSize: 10, color: ZenColors.inkMute),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
