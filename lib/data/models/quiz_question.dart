@@ -7,6 +7,7 @@ class QuizQuestion {
   final String id;
   final String examType;
   final String year;
+  final String categoryKey;
   final String categoryName;
   final String number;
   final int numberInt;
@@ -19,6 +20,7 @@ class QuizQuestion {
     required this.id,
     required this.examType,
     required this.year,
+    required this.categoryKey,
     required this.categoryName,
     required this.number,
     required this.numberInt,
@@ -50,6 +52,7 @@ class QuizQuestion {
       id: row.id,
       examType: row.examType,
       year: row.year,
+      categoryKey: row.categoryKey,
       categoryName: row.categoryName,
       number: row.number,
       numberInt: row.numberInt,

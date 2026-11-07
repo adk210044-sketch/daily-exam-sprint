@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../data/database/app_database.dart' show QuizDraft;
+import '../data/database/app_database.dart' show ExamSession, QuizDraft;
 import '../data/models/quiz_question.dart';
 import '../data/repositories/exam_session_repository.dart';
 import '../data/repositories/review_repository.dart';
+import '../data/services/diagnosis_service.dart';
 
-enum QuizMode { daily, review }
+enum QuizMode { daily, review, mockExam }
 
 /// 1回の演習セッション (Question → Feedback → ... → Result) の状態を管理
 class QuizSessionProvider extends ChangeNotifier {
@@ -17,9 +18,17 @@ class QuizSessionProvider extends ChangeNotifier {
   QuizSessionProvider(this.examRepo, this.reviewRepo);
 
   QuizMode mode = QuizMode.daily;
-  String? sessionId; // daily モードのときのみ有効
+  String? sessionId; // daily / mockExam モードのときのみ有効
   int day = 1;
   int attempt = 1;
+
+  /// 模試モード用: 選択した試験回 (結果画面でラベル表示等に使う)。
+  ExamSession? mockExamSession;
+
+  /// 模試モードの回答ログは、通常の Day1-5 進行ロジック (苦手復習の
+  /// ミス率集計やカレンダー進捗) に一切影響を与えないよう、
+  /// 専用の day 値 (範囲外の固定値) を使って記録する。
+  static const int mockExamDayMarker = 99;
 
   /// true の場合、これは「おかわり(過去の回を選んで解き直す)」セッション。
   /// 現在の進捗Day (session.day) には影響を与えない。
@@ -216,6 +225,29 @@ class QuizSessionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 模試試験モード (有料限定): 既存の過去問から選んだ1回分を、
+  /// 本番と同じ全問構成・制限時間ありで演習する。
+  /// 進捗 (session.day / attempt / カレンダー) には一切影響を与えない、
+  /// 独立した読み取り専用プレイセッション (一時保存の対象外)。
+  Future<void> startMockExam(ExamSession session) async {
+    isLoading = true;
+    notifyListeners();
+
+    mode = QuizMode.mockExam;
+    isReplay = false;
+    sessionId = session.id;
+    mockExamSession = session;
+    day = mockExamDayMarker;
+    attempt = 1;
+
+    final mockService = MockExamService(examRepo.db);
+    questions = await mockService.fullQuestionsFor(session);
+    _resetProgress();
+
+    isLoading = false;
+    notifyListeners();
+  }
+
   void _resetProgress() {
     currentIndex = 0;
     chosenAnswers
@@ -301,6 +333,9 @@ class QuizSessionProvider extends ChangeNotifier {
         correct: correct,
       );
     }
+    // 模試モードは selectChoice()/completeSession() を使う専用フローのため
+    // (即時フィードバックを出さず、全問回答後にまとめて採点・ログ記録する)、
+    // この answer() は呼ばれない想定。
     await _saveDraft();
     notifyListeners();
     return correct;
@@ -329,6 +364,30 @@ class QuizSessionProvider extends ChangeNotifier {
     }
   }
 
+  /// 模試モード専用: 即時フィードバックを出さずに選択肢だけを記録する。
+  /// (通常の [answer] は正誤をその場で確定させ画面遷移を伴うが、模試は
+  /// 全問回答後にまとめて採点するため、選び直し・前後の移動を許可する)
+  void selectChoice(int choiceIndex) {
+    final q = currentQuestion;
+    final correct = choiceIndex == q.correctIndex;
+    final previousChoice = chosenAnswers[currentIndex];
+    final wasCorrect = previousChoice != null && previousChoice == q.correctIndex;
+    chosenAnswers[currentIndex] = choiceIndex;
+    if (correct && !wasCorrect) {
+      correctCount++;
+    } else if (!correct && wasCorrect) {
+      correctCount--;
+    }
+    notifyListeners();
+  }
+
+  /// 模試モード専用: 指定した問題インデックスへ自由に移動する。
+  void jumpTo(int index) {
+    if (index < 0 || index >= questions.length) return;
+    currentIndex = index;
+    notifyListeners();
+  }
+
   /// 完走時に呼ぶ。score(0-100) と 花丸フラグを返す。
   Future<({int score, bool hanamaru})> completeSession() async {
     // 完走したので下書きは不要 (次回開始時は必ず新規スタート)。
@@ -346,6 +405,29 @@ class QuizSessionProvider extends ChangeNotifier {
         totalQuestions: questions.length,
       );
       return result;
+    } else if (mode == QuizMode.mockExam && sessionId != null) {
+      // 模試モード: 採点確定時に、回答済みの問題だけをまとめてログに記録する
+      // (合格可能性診断のカテゴリ別正答率集計の母数になる)。
+      for (var i = 0; i < questions.length; i++) {
+        final chosenIdx = chosenAnswers[i];
+        if (chosenIdx == null) continue; // 未回答は不正解扱いだがログには残さない
+        final q = questions[i];
+        await examRepo.recordAnswer(
+          sessionId: sessionId!,
+          questionId: q.id,
+          day: mockExamDayMarker,
+          attempt: attempt,
+          chosen: chosenIdx,
+          correct: chosenIdx == q.correctIndex,
+        );
+      }
+      final score = questions.isEmpty
+          ? 0
+          : ((correctCount / questions.length) * 100).round();
+      return (
+        score: score,
+        hanamaru: correctCount == questions.length && questions.isNotEmpty,
+      );
     } else {
       final score = questions.isEmpty
           ? 0

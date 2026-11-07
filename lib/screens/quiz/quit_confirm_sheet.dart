@@ -10,15 +10,17 @@ Future<bool?> showQuitConfirmSheet(BuildContext context) {
   final quiz = context.read<QuizSessionProvider>();
   final total = quiz.totalQuestions;
   final String titleLabel;
-  if (quiz.mode == QuizMode.review) {
+  if (quiz.mode == QuizMode.mockExam) {
+    titleLabel = '模試 $total問を中断しますか？';
+  } else if (quiz.mode == QuizMode.review) {
     titleLabel = '苦手 $total問を中断しますか？';
   } else if (quiz.isReplay) {
     titleLabel = 'おかわり $total問を中断しますか？';
   } else {
     titleLabel = '今日の $total問を中断しますか？';
   }
-  // おかわり (過去の回の解き直し) のみ一時保存の対象外。
-  final String bodyLabel = quiz.isReplay
+  // おかわり (過去の回の解き直し)・模試試験は一時保存の対象外。
+  final String bodyLabel = (quiz.isReplay || quiz.mode == QuizMode.mockExam)
       ? '進捗は保存されないため、\nもう一度、1問目から解くことになります。'
       : '回答済みの問題は保存されるので、\n次回は途中から再開できます。';
   return showModalBottomSheet<bool>(

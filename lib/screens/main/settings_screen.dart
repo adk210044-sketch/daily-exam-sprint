@@ -6,11 +6,13 @@ import '../../data/database/app_database.dart';
 import '../../providers/app_state.dart';
 import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
+import '../commerce/mock_exam_selector_screen.dart';
 import '../commerce/paywall_screen.dart';
 import 'calendar_screen.dart';
 import 'disclaimer_screen.dart';
 import 'home_screen.dart';
 import 'legal_text_screen.dart';
+import 'pass_diagnosis_screen.dart';
 import 'review_screen.dart';
 
 /// 設定 (ZenSettings)
@@ -304,6 +306,27 @@ class SettingsScreen extends StatelessWidget {
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const ExamSelectorScreen(),
+                          ),
+                        ),
+                      ),
+                      _sectionLabel('腕試し'),
+                      _row(
+                        context,
+                        label: '合格可能性診断',
+                        value: appState.hasFullAccess ? '' : '有料版',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PassDiagnosisScreen(),
+                          ),
+                        ),
+                      ),
+                      _row(
+                        context,
+                        label: '模試試験モード',
+                        value: appState.hasFullAccess ? '' : '有料版',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MockExamSelectorScreen(),
                           ),
                         ),
                       ),

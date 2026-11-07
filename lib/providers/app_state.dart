@@ -5,6 +5,7 @@ import '../data/repositories/exam_session_repository.dart';
 import '../data/repositories/reminder_repository.dart';
 import '../data/repositories/review_repository.dart';
 import '../data/repositories/settings_repository.dart';
+import '../data/services/diagnosis_service.dart';
 import '../data/services/exam_session_initializer.dart';
 import '../data/services/notification_service.dart';
 import '../data/services/purchase_service.dart';
@@ -17,6 +18,8 @@ class AppState extends ChangeNotifier {
   late final ExamSessionRepository examRepo;
   late final ReviewRepository reviewRepo;
   late final ReminderRepository reminderRepo;
+  late final DiagnosisService diagnosisService;
+  late final MockExamService mockExamService;
 
   UserSetting? settings;
   List<Reminder> reminders = [];
@@ -30,6 +33,8 @@ class AppState extends ChangeNotifier {
     examRepo = ExamSessionRepository(db);
     reviewRepo = ReviewRepository(db);
     reminderRepo = ReminderRepository(db);
+    diagnosisService = DiagnosisService(db, examRepo);
+    mockExamService = MockExamService(db);
   }
 
   Future<void> init() async {

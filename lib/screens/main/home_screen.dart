@@ -10,10 +10,12 @@ import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/enso_circle.dart';
 import '../../widgets/zen_widgets.dart';
 import '../commerce/exam_selector_screen.dart';
+import '../commerce/mock_exam_selector_screen.dart';
 import '../commerce/paywall_screen.dart';
 import '../quiz/question_screen.dart';
 import 'calendar_screen.dart';
 import 'next_exam_prompt_screen.dart';
+import 'pass_diagnosis_screen.dart';
 import 'review_screen.dart';
 import 'settings_screen.dart';
 import 'review_day_home_screen.dart';
@@ -685,6 +687,40 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
+                    // 模試試験・合格可能性診断への導線
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _ToolLinkCard(
+                              icon: Icons.timer_outlined,
+                              label: '模試試験',
+                              locked: !context.watch<AppState>().hasFullAccess,
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const MockExamSelectorScreen(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _ToolLinkCard(
+                              icon: Icons.query_stats,
+                              label: '合格可能性診断',
+                              locked: !context.watch<AppState>().hasFullAccess,
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const PassDiagnosisScreen(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     // Today's attempts history
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
@@ -708,5 +744,64 @@ class _HomeScreenState extends State<HomeScreen> {
   String _safeDailyLabel(String dateStr) {
     final n = context.read<AppState>().dailyQuestionCount;
     return 'DAILY $n  ·  $dateStr';
+  }
+}
+
+/// ホーム画面下部の「模試試験」「合格可能性診断」への導線カード。
+class _ToolLinkCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool locked;
+  final VoidCallback onTap;
+
+  const _ToolLinkCard({
+    required this.icon,
+    required this.label,
+    required this.locked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          color: ZenColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: ZenColors.line),
+        ),
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, size: 20, color: ZenColors.accent),
+                if (locked)
+                  const Positioned(
+                    right: -6,
+                    top: -4,
+                    child: Icon(
+                      Icons.lock,
+                      size: 11,
+                      color: ZenColors.inkMute,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: ZenColors.ink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
