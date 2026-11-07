@@ -204,7 +204,7 @@ class _PassDiagnosisScreenState extends State<PassDiagnosisScreen> {
                         ? '現時点の正答傾向は、公式合格基準(総合60%・各科目40%以上)を満たしています。'
                         : diagnosis.overallRate < 0.6
                         ? '総合正答率が60%に届いていません。苦手復習や模試で底上げしましょう。'
-                        : '総合は60%以上ですが、40%未満の科目(${diagnosis.failingSubjects.map((s) => s.subject.label).join('・')})があります。科目間のバランスが合格のカギです。',
+                        : '総合は60%以上ですが、40%未満の科目(${diagnosis.failingSubjects.map((s) => s.subject.shortLabel).join('・')})があります。科目間のバランスが合格のカギです。',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -279,7 +279,8 @@ class _SubjectBar extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  score.subject.label,
+                  score.subject.shortLabel,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

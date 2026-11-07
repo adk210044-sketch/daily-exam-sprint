@@ -6,17 +6,39 @@ import '../repositories/exam_session_repository.dart';
 
 /// 公式試験の「科目」区分 (合格基準は科目ごとに40%以上)。
 /// Questions.categoryKey は law_harm/law_general/labor_harm/labor_general/
-/// physiology の5種類だが、法令上の合格基準はこれをさらに
-/// 「関係法令」「労働衛生」「労働生理」の3科目にまとめた単位で判定する。
-enum ExamSubject { law, hygiene, physiology }
+/// physiology の5種類。第1種はこの5科目区分のまま合否判定されるため、
+/// 「有害業務に係るもの」「有害業務以外」を分けて診断する。
+/// (第2種には law_harm/labor_harm の問題が存在しないため、結果的に
+/// 3科目のみが表示される)
+enum ExamSubject { lawHarm, lawGeneral, hygieneHarm, hygieneGeneral, physiology }
 
 extension ExamSubjectX on ExamSubject {
   String get label {
     switch (this) {
-      case ExamSubject.law:
-        return '関係法令';
-      case ExamSubject.hygiene:
-        return '労働衛生';
+      case ExamSubject.lawHarm:
+        return '関係法令(有害業務に係るもの)';
+      case ExamSubject.lawGeneral:
+        return '関係法令(有害業務以外)';
+      case ExamSubject.hygieneHarm:
+        return '労働衛生(有害業務に係るもの)';
+      case ExamSubject.hygieneGeneral:
+        return '労働衛生(有害業務以外)';
+      case ExamSubject.physiology:
+        return '労働生理';
+    }
+  }
+
+  /// レイアウトが狭い箇所向けの短縮ラベル。
+  String get shortLabel {
+    switch (this) {
+      case ExamSubject.lawHarm:
+        return '関係法令(有害)';
+      case ExamSubject.lawGeneral:
+        return '関係法令(有害以外)';
+      case ExamSubject.hygieneHarm:
+        return '労働衛生(有害)';
+      case ExamSubject.hygieneGeneral:
+        return '労働衛生(有害以外)';
       case ExamSubject.physiology:
         return '労働生理';
     }
@@ -25,9 +47,18 @@ extension ExamSubjectX on ExamSubject {
 
 /// categoryKey ("law_harm" 等) を公式科目区分にマッピングする。
 ExamSubject subjectOfCategoryKey(String categoryKey) {
-  if (categoryKey.startsWith('law_')) return ExamSubject.law;
-  if (categoryKey.startsWith('labor_')) return ExamSubject.hygiene;
-  return ExamSubject.physiology;
+  switch (categoryKey) {
+    case 'law_harm':
+      return ExamSubject.lawHarm;
+    case 'law_general':
+      return ExamSubject.lawGeneral;
+    case 'labor_harm':
+      return ExamSubject.hygieneHarm;
+    case 'labor_general':
+      return ExamSubject.hygieneGeneral;
+    default:
+      return ExamSubject.physiology;
+  }
 }
 
 /// 1科目分の正答率集計結果。

@@ -266,7 +266,8 @@ class _SubjectRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              score.subject.label,
+              score.subject.shortLabel,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
